@@ -1,3 +1,4 @@
+import 'package:fluent_beat/pages/client/monitor/monitor.dart';
 import 'package:flutter/material.dart';
 
 class ClientPage extends StatefulWidget {
@@ -9,8 +10,9 @@ class ClientPage extends StatefulWidget {
 
 class _ClientPageState extends State<ClientPage> {
   int currentIndex = 0;
+
   final screens = [
-    Text("Dashboard"),
+    ClientMonitor(),
     Text("My Heart"),
     Text("Revisions"),
     Text("Settings"),
