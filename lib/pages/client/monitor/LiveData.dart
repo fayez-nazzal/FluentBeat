@@ -1,6 +1,6 @@
 class LiveData {
   int x;
-  int y;
+  double y;
 
   LiveData(this.x, this.y);
 }

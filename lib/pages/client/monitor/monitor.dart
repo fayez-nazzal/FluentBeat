@@ -22,19 +22,25 @@ class _ClientMonitorState extends State<ClientMonitor> {
   List<LiveData> appendData = <LiveData>[];
   Timer? timer;
   ChartSeriesController? _chartSeriesController;
-  int time = 188;
+  final int chartLimit = 68;
+  late int time;
   bool connected = true;
+
+  // for normalizing data
+  final int xMin = 100;
+  final int xMax = 900;
 
   @override
   void initState() {
     super.initState();
 
     setState(() {
-      for (int i = 0; i < 188; i++) {
-        chartData.add(LiveData(i, i));
+      for (int i = 0; i < chartLimit; i++) {
+        chartData.add(LiveData(i, 0));
       }
     });
 
+    time = chartData.length;
     timer = Timer.periodic(const Duration(milliseconds: 8), _updateDataSource);
   }
 
@@ -72,25 +78,24 @@ class _ClientMonitorState extends State<ClientMonitor> {
           RegExp letterExp = RegExp(r'(E)'); // only E letter
 
           decodedData.split("").forEach((element) {
-            if (bufferStr.endsWith("E")) {
-              try {
-                LiveData liveData = LiveData(time,
-                    int.parse(bufferStr.substring(1, bufferStr.length - 1)));
-                time += 1;
+            if (bufferStr.length > 2 &&
+                bufferStr.endsWith("E") &&
+                bufferStr.startsWith("E")) {
+              int x = int.parse(bufferStr.substring(1, bufferStr.length - 1));
+              double normX = (x - xMin) / (xMax - xMin);
+              LiveData liveData = LiveData(time, normX);
+              time += 1;
 
-                appendData.add(liveData);
+              appendData.add(liveData);
 
-                print(liveData.y);
+              print(liveData.y);
 
-                bufferStr = "E";
-              } catch (err) {
-                print(err);
-                print("error occured");
-              }
+              bufferStr = "E";
             }
 
-            if (digitExp.hasMatch(element) || letterExp.hasMatch(element))
+            if (element == "E" || digitExp.hasMatch(element)) {
               bufferStr += element;
+            }
           });
         }
       }).onDone(() {
@@ -148,9 +153,10 @@ class _ClientMonitorState extends State<ClientMonitor> {
           ],
           enableAxisAnimation: true,
           primaryYAxis: NumericAxis(
-            minimum: 100,
-            maximum: 900,
+            minimum: 0.000,
+            maximum: 1.000,
           ),
+          primaryXAxis: NumericAxis(isVisible: false),
         ),
       ],
     );
