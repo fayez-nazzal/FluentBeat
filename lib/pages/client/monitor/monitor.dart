@@ -24,11 +24,17 @@ class _ClientMonitorState extends State<ClientMonitor> {
   ChartSeriesController? _chartSeriesController;
   final int chartLimit = 68;
   late int time;
-  bool connected = true;
+  bool exitConnection = false;
+  bool connected = false;
+  bool error = false;
+  final int connectionCountdownMax = 6;
+  int connectionCountdown = 0;
+  bool placedProperly = false;
+  int bpm = 0;
 
   // for normalizing data
-  final int xMin = 100;
-  final int xMax = 900;
+  final int xMin = 200;
+  final int xMax = 1000;
 
   @override
   void initState() {
@@ -44,16 +50,32 @@ class _ClientMonitorState extends State<ClientMonitor> {
     timer = Timer.periodic(const Duration(milliseconds: 8), _updateDataSource);
   }
 
-  void scanForDevices() async {
-    connected = true;
+  void _updateConnectionCountdown(Timer timer) {
+    setState(() {
+      if (exitConnection || connectionCountdown <= 0 || connected) {
+        connectionCountdown = 0;
+        timer.cancel();
+      }
 
-    FlutterBluetoothSerial.instance
-        .getBondedDevices()
-        .then((List<BluetoothDevice> bondedDevices) {
-      bondedDevices.forEach((element) {
-        print(element.name);
-        print(element.address);
-      });
+      if (exitConnection) {
+        connectionCountdown = 0;
+        connected = false;
+        exitConnection = false;
+      } else if (connectionCountdown > 0) {
+        connectionCountdown -= 1;
+      } else {
+        if (!connected) error = true;
+      }
+    });
+  }
+
+  void _connectToECGDevice() async {
+    setState(() {
+      exitConnection = false;
+      connectionCountdown = connectionCountdownMax;
+      connected = false;
+      error = false;
+      Timer.periodic(const Duration(seconds: 1), _updateConnectionCountdown);
     });
 
     try {
@@ -62,9 +84,15 @@ class _ClientMonitorState extends State<ClientMonitor> {
       print('Connected to the device');
 
       connection.input?.listen((Uint8List data) {
-        if (!connected) {
+        if (exitConnection) {
+          connected = false;
           connection.finish();
+          exitConnection = false;
         } else {
+          error = false;
+          connected = true;
+          connectionCountdown = 0;
+
           connection.output.add(data); // Sending data
 
           String decodedData = ascii.decode(data);
@@ -102,13 +130,15 @@ class _ClientMonitorState extends State<ClientMonitor> {
         print('Disconnected by remote request');
       });
     } catch (exception) {
-      print(exception);
-      print('Cannot connect, exception occured');
+      connected = false;
+      error = true;
     }
   }
 
   void disconnectDevice() {
     setState(() {
+      exitConnection = true;
+      error = false;
       connected = false;
     });
   }
@@ -128,37 +158,91 @@ class _ClientMonitorState extends State<ClientMonitor> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            ElevatedButton(
-                onPressed: scanForDevices, child: const Text("Scan")),
-            ElevatedButton(
-                onPressed: disconnectDevice, child: const Text("Disconnect"))
-          ],
-        ),
-        SfCartesianChart(
-          series: [
-            FastLineSeries<LiveData, int>(
-                onRendererCreated: (ChartSeriesController controller) {
-                  // Assigning the controller to the _chartSeriesController.
-                  _chartSeriesController = controller;
-                },
-                // Binding the chartData to the dataSource of the line series.
-                dataSource: chartData,
-                xValueMapper: (LiveData liveData, _) => liveData.x,
-                yValueMapper: (LiveData liveData, _) => liveData.y,
-                animationDuration: 8),
-          ],
-          enableAxisAnimation: true,
-          primaryYAxis: NumericAxis(
-            minimum: 0.000,
-            maximum: 1.000,
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("My Heart"),
+        actions: [],
+      ),
+      body: Column(
+        children: [
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 16),
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                    onPressed: _connectToECGDevice,
+                    child: const Text("Connect to ECG device")),
+                ElevatedButton(
+                    onPressed: disconnectDevice,
+                    child: const Text("Disconnect"))
+              ],
+            ),
           ),
-          primaryXAxis: NumericAxis(isVisible: false),
-        ),
-      ],
+          Container(
+            margin: const EdgeInsets.all(10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  error
+                      ? Icons.error
+                      : connectionCountdown > 0
+                          ? Icons.bluetooth
+                          : !connected
+                              ? Icons.bluetooth_disabled
+                              : Icons.bluetooth_connected,
+                  color: connectionCountdown > 0
+                      ? Colors.blue
+                      : connected
+                          ? Colors.green
+                          : Colors.red,
+                ),
+                Padding(padding: const EdgeInsets.only(right: 6)),
+                Text(
+                  error
+                      ? "Can't connect to the ECG device."
+                      : connectionCountdown > 0 && !connected && !exitConnection
+                          ? "Connectoing to the ECG device ($connectionCountdown)..."
+                          : connected
+                              ? "ECG device connected"
+                              : "ECG device not connected",
+                  style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 16,
+                      color: error || (!connected && connectionCountdown == 0)
+                          ? Colors.red
+                          : Colors.blue),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 52),
+            child: SfCartesianChart(
+              series: [
+                FastLineSeries<LiveData, int>(
+                    onRendererCreated: (ChartSeriesController controller) {
+                      // Assigning the controller to the _chartSeriesController.
+                      _chartSeriesController = controller;
+                    },
+                    // Binding the chartData to the dataSource of the line series.
+                    dataSource: chartData,
+                    xValueMapper: (LiveData liveData, _) => liveData.x,
+                    yValueMapper: (LiveData liveData, _) => liveData.y,
+                    animationDuration: 8),
+              ],
+              enableAxisAnimation: true,
+              primaryYAxis: NumericAxis(
+                minimum: 0.000,
+                maximum: 1.000,
+              ),
+              primaryXAxis: NumericAxis(isVisible: false),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

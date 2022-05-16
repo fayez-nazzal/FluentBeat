@@ -12,8 +12,8 @@ class _ClientPageState extends State<ClientPage> {
   int currentIndex = 0;
 
   final screens = [
+    Text("Dashboard"),
     ClientMonitor(),
-    Text("My Heart"),
     Text("Revisions"),
     Text("Settings"),
   ];
@@ -21,14 +21,12 @@ class _ClientPageState extends State<ClientPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
       body: IndexedStack(
         index: currentIndex,
         children: screens,
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        showUnselectedLabels: false,
         iconSize: 28,
         items: const [
           BottomNavigationBarItem(
