@@ -6,6 +6,7 @@ import 'package:fluent_beat/pages/client/monitor/LiveData.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:http/http.dart' as http;
 
 class ClientMonitor extends StatefulWidget {
   ClientMonitor({Key? key}) : super(key: key);
@@ -15,9 +16,11 @@ class ClientMonitor extends StatefulWidget {
 }
 
 class _ClientMonitorState extends State<ClientMonitor> {
-  List<int> normBuffer = List.filled(188, 0);
+  List<double> normBuffer = <double>[];
   int normBufferIndex = 0;
   String bufferStr = "";
+  String normStr = "";
+  bool isTakingSample = false;
   List<LiveData> chartData = <LiveData>[];
   List<LiveData> appendData = <LiveData>[];
   Timer? timer;
@@ -27,10 +30,16 @@ class _ClientMonitorState extends State<ClientMonitor> {
   bool exitConnection = false;
   bool connected = false;
   bool error = false;
-  final int connectionCountdownMax = 6;
+  final int connectionCountdownMax = 12;
   int connectionCountdown = 0;
   bool placedProperly = false;
   int bpm = 0;
+
+  // samples will be sent every ( 1.5 * this variable  ) seconds
+  final int sampleDelayMultiplier = 1;
+  int currentSampleIndex = 0;
+
+  Map<String, int> predictions = {};
 
   // for normalizing data
   final int xMin = 200;
@@ -48,6 +57,19 @@ class _ClientMonitorState extends State<ClientMonitor> {
 
     time = chartData.length;
     timer = Timer.periodic(const Duration(milliseconds: 8), _updateDataSource);
+  }
+
+  Future<http.Response> _sendSample() {
+    return http.post(
+      Uri.parse(
+          "https://rhp8umja5e.execute-api.us-east-2.amazonaws.com/invoke_sklearn/invoke_sklearn"),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, List>{
+        'data': normBuffer,
+      }),
+    );
   }
 
   void _updateConnectionCountdown(Timer timer) {
@@ -105,8 +127,51 @@ class _ClientMonitorState extends State<ClientMonitor> {
           RegExp digitExp = RegExp(r'(\d)');
           RegExp letterExp = RegExp(r'(E)'); // only E letter
 
-          decodedData.split("").forEach((element) {
-            if (bufferStr.length > 2 &&
+          decodedData.split("").forEach((element) async {
+            if (isTakingSample &&
+                bufferStr.length > 2 &&
+                bufferStr.startsWith("S") &&
+                bufferStr.endsWith("S")) {
+              int x = int.parse(bufferStr.substring(1, bufferStr.length - 1));
+              double normX = (x - xMin) / (xMax - xMin);
+              LiveData liveData = LiveData(time, normX);
+              time += 1;
+
+              appendData.add(liveData);
+              normBuffer.add(normX);
+
+              // if norm buffer is full, send request to the endpoint and clear
+              if (normBuffer.length == 187) {
+                setState(() {
+                  isTakingSample = false;
+                  bufferStr = "";
+                });
+
+                // send request to the endpoint
+                print('req');
+                final response = await _sendSample();
+
+                if (response.statusCode == 200 &&
+                    currentSampleIndex == sampleDelayMultiplier) {
+                  if (predictions.containsKey(response.body)) {
+                    predictions.update(response.body, (value) => value + 1);
+                  } else {
+                    predictions[response.body] = 1;
+                  }
+
+                  currentSampleIndex = 0;
+                }
+
+                predictions.forEach((key, value) {
+                  print("for class $key value is $value");
+                });
+
+                currentSampleIndex += 1;
+                normBuffer.clear();
+              }
+
+              bufferStr = "S";
+            } else if (bufferStr.length > 2 &&
                 bufferStr.endsWith("E") &&
                 bufferStr.startsWith("E")) {
               int x = int.parse(bufferStr.substring(1, bufferStr.length - 1));
@@ -116,13 +181,22 @@ class _ClientMonitorState extends State<ClientMonitor> {
 
               appendData.add(liveData);
 
-              print(liveData.y);
-
               bufferStr = "E";
             }
 
-            if (element == "E" || digitExp.hasMatch(element)) {
+            if (element == "E") {
+              isTakingSample = false;
+            }
+
+            if (element == "E" ||
+                element == "S" ||
+                digitExp.hasMatch(element)) {
               bufferStr += element;
+            }
+
+            if (element == "N") {
+              isTakingSample = !isTakingSample;
+              bufferStr = "";
             }
           });
         }
@@ -161,7 +235,9 @@ class _ClientMonitorState extends State<ClientMonitor> {
     return Scaffold(
       appBar: AppBar(
         title: Text("My Heart"),
-        actions: [],
+        actions: [
+          IconButton(onPressed: () {}, icon: Icon(Icons.chat_bubble_rounded)),
+        ],
       ),
       body: Column(
         children: [

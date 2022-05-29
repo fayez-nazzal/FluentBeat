@@ -1,6 +1,5 @@
-import 'package:fluent_beat/pages/client/client.dart';
+import 'package:fluent_beat/pages/common/home/home.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,7 +14,10 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: ClientPage(),
+      theme: ThemeData(
+        fontFamily: "Proxima Nova",
+      ),
+      home: StartHome(),
       debugShowCheckedModeBanner: false,
     );
   }
