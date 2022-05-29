@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 
 import '../../../widgets/Button/Button.dart';
 
-class Login extends StatelessWidget {
+class Signup extends StatelessWidget {
   String username = "";
   String password = "";
+  String confirmPassword = "";
 
-  Login({Key? key}) : super(key: key);
+  Signup({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -23,6 +24,13 @@ class Login extends StatelessWidget {
             password = txt;
           },
           labelText: "Password",
+          password: true,
+        ),
+        Input(
+          onChange: (txt) {
+            password = txt;
+          },
+          labelText: "Confirm Password",
           password: true,
         ),
         Padding(

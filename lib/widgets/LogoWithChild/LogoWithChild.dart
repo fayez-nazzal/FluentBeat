@@ -31,7 +31,6 @@ class LogoWithChild extends StatelessWidget {
                         Image(image: AssetImage('images/FluentBeat.png')),
                         Spacer(),
                         child!,
-                        Spacer()
                       ],
                     )))));
   }
