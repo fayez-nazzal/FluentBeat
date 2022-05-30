@@ -1,8 +1,11 @@
+import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
 import 'package:fluent_beat/pages/client/monitor/monitor.dart';
 import 'package:flutter/material.dart';
 
 class ClientPage extends StatefulWidget {
-  ClientPage({Key? key}) : super(key: key);
+  final AuthUser user;
+
+  ClientPage({Key? key, required this.user}) : super(key: key);
 
   @override
   State<ClientPage> createState() => _ClientPageState();

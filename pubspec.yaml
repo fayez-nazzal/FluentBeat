@@ -34,6 +34,8 @@ dependencies:
   flutter_blue: ^0.8.0
   syncfusion_flutter_charts: ^20.1.55
   http: ^0.13.4
+  amplify_flutter: ^0.5.1
+  amplify_auth_cognito: ^0.5.1
 
 dev_dependencies:
   flutter_test:

@@ -1,0 +1,20 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-fluentbeat-dev-215933-authRole",
+      "UnauthRoleArn": "arn:aws:iam::082810050114:role/amplify-fluentbeat-dev-215933-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::082810050114:role/amplify-fluentbeat-dev-215933-authRole",
+      "Region": "eu-central-1",
+      "DeploymentBucketName": "amplify-fluentbeat-dev-215933-deployment",
+      "UnauthRoleName": "amplify-fluentbeat-dev-215933-unauthRole",
+      "StackName": "amplify-fluentbeat-dev-215933",
+      "StackId": "arn:aws:cloudformation:eu-central-1:082810050114:stack/amplify-fluentbeat-dev-215933/7b7eb740-df81-11ec-a470-02a92b9fce96",
+      "AmplifyAppId": "d1xtv0gwg0tpt8"
+    },
+    "categories": {
+      "auth": {
+        "fluentbeatad9dfc38ad9dfc38": {}
+      }
+    }
+  }
+}
