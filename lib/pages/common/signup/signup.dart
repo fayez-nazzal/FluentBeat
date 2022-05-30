@@ -5,6 +5,7 @@ import 'package:fluent_beat/pages/common/login/login.dart';
 import 'package:fluent_beat/widgets/Input/Input.dart';
 import 'package:fluent_beat/widgets/LogoWithChild/LogoWithChild.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../../../widgets/Button/Button.dart';
 
@@ -21,8 +22,11 @@ class _SignupState extends State<Signup> {
   String password = "";
   String message = "";
   String confirmPassword = "";
-  bool hasUser = false;
+  String verficationCode = "";
   late AuthUser user;
+
+  int currentIndex = 0;
+  late List<Widget> pages;
 
   void checkUser() async {
     try {
@@ -30,7 +34,7 @@ class _SignupState extends State<Signup> {
 
       // if so, push to the client page
       setState(() {
-        hasUser = true;
+        Get.to(ClientPage(user: user));
       });
     } on AuthException {
       // nothing to do...
@@ -42,6 +46,59 @@ class _SignupState extends State<Signup> {
     super.initState();
 
     checkUser();
+
+    pages = [
+      Column(
+        children: [
+          Input(
+              onChange: (txt) {
+                name = txt.trim();
+              },
+              labelText: "Name"),
+          Input(
+              onChange: (txt) {
+                username = txt.trim();
+              },
+              labelText: "Email"),
+          Input(
+            onChange: (txt) {
+              password = txt;
+            },
+            labelText: "Password",
+            password: true,
+          ),
+          Input(
+            onChange: (txt) {
+              confirmPassword = txt;
+            },
+            labelText: "Confirm Password",
+            password: true,
+          ),
+        ],
+      ),
+      Column(
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(bottom: 16.0),
+            child: Text("Please, check your Email for the verfication code.",
+                style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w500)),
+          ),
+          Input(
+              onChange: (txt) {
+                verficationCode = txt.trim();
+              },
+              labelText: "Verfication Code"),
+          Button(
+              bg: 0xffffffff,
+              text: "Resend Code",
+              onPrimary: 0xffff7f7f,
+              onPress: resendVerficationCode),
+        ],
+      )
+    ];
   }
 
   void signUp() async {
@@ -74,10 +131,8 @@ class _SignupState extends State<Signup> {
           password: password,
           options: CognitoSignUpOptions(userAttributes: userAttributes));
 
-      user = await Amplify.Auth.getCurrentUser();
-
       setState(() {
-        hasUser = true;
+        currentIndex = 1;
       });
     } on AuthException catch (e) {
       setState(() {
@@ -88,40 +143,49 @@ class _SignupState extends State<Signup> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    if (hasUser) {
-      Navigator.push(context,
-          MaterialPageRoute(builder: (context) => ClientPage(user: user)));
+  void confirmSignup() async {
+    if (verficationCode == "") {
+      setState(() {
+        message = "Verfication code is required";
+      });
+
+      return;
     }
 
+    try {
+      await Amplify.Auth.confirmSignUp(
+          username: username, confirmationCode: verficationCode);
+
+      await Amplify.Auth.signIn(username: username, password: password);
+
+      user = await Amplify.Auth.getCurrentUser();
+
+      setState(() {
+        Get.to(ClientPage(user: user));
+      });
+    } on AuthException catch (e) {
+      setState(() {
+        message = e.message;
+      });
+    }
+  }
+
+  void resendVerficationCode() async {
+    try {
+      await Amplify.Auth.resendSignUpCode(username: username);
+    } on AuthException catch (e) {
+      setState(() {
+        message = e.message;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return LogoWithChild(
         child: Column(
       children: [
-        Input(
-            onChange: (txt) {
-              name = txt.trim();
-            },
-            labelText: "Name"),
-        Input(
-            onChange: (txt) {
-              username = txt.trim();
-            },
-            labelText: "Email"),
-        Input(
-          onChange: (txt) {
-            password = txt;
-          },
-          labelText: "Password",
-          password: true,
-        ),
-        Input(
-          onChange: (txt) {
-            confirmPassword = txt;
-          },
-          labelText: "Confirm Password",
-          password: true,
-        ),
+        pages[currentIndex],
         Text(message,
             style: const TextStyle(
                 color: Colors.red, fontWeight: FontWeight.w500, fontSize: 18)),
@@ -131,7 +195,7 @@ class _SignupState extends State<Signup> {
               bg: 0xffff7f7f,
               text: "Sign Up",
               onPrimary: 0xffffff,
-              onPress: signUp),
+              onPress: verficationCode == "" ? signUp : confirmSignup),
         ),
       ],
     ));

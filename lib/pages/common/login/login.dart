@@ -4,6 +4,7 @@ import 'package:fluent_beat/widgets/Input/Input.dart';
 import 'package:fluent_beat/widgets/LogoWithChild/LogoWithChild.dart';
 import 'package:flutter/material.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
+import 'package:get/get.dart';
 
 import '../../../widgets/Button/Button.dart';
 
@@ -21,15 +22,11 @@ class _LoginState extends State<Login> {
   String message = "";
 
   late AuthUser user;
-  bool hasUser = false;
-
   void checkUser() async {
     try {
       user = await Amplify.Auth.getCurrentUser();
 
-      setState(() {
-        hasUser = true;
-      });
+      Get.to(ClientPage(user: user));
     } on AuthException {
       // nothing to do...
     }
@@ -57,8 +54,8 @@ class _LoginState extends State<Login> {
 
       user = await Amplify.Auth.getCurrentUser();
 
-      setState(() async {
-        hasUser = true;
+      setState(() {
+        Get.to(ClientPage(user: user));
       });
     } on AuthException catch (e) {
       setState(() {
@@ -69,11 +66,6 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
-    if (hasUser) {
-      Navigator.push(context,
-          MaterialPageRoute(builder: (context) => ClientPage(user: user)));
-    }
-
     return LogoWithChild(
       child: Column(
         children: [

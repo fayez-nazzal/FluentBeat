@@ -3,6 +3,7 @@ import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:fluent_beat/app.dart';
 import 'package:fluent_beat/pages/common/home/home.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'amplifyconfiguration.dart';
 
 void main() {
@@ -17,7 +18,7 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       theme: ThemeData(
         fontFamily: "Proxima Nova",
         colorScheme: ColorScheme.fromSwatch(
