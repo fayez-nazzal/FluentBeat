@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:fluent_beat/pages/client/monitor/LiveData.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'package:get/get_connect/http/src/response/response.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:http/http.dart' as http;
 
@@ -38,12 +39,15 @@ class _ClientMonitorState extends State<ClientMonitor> {
   // samples will be sent every ( 1.5 * this variable  ) seconds
   final int sampleDelayMultiplier = 1;
   int currentSampleIndex = 0;
+  bool callingReq = false;
 
   Map<String, int> predictions = {};
 
   // for normalizing data
   final int xMin = 200;
   final int xMax = 1000;
+
+  String winnerClass = "";
 
   @override
   void initState() {
@@ -59,17 +63,64 @@ class _ClientMonitorState extends State<ClientMonitor> {
     timer = Timer.periodic(const Duration(milliseconds: 8), _updateDataSource);
   }
 
-  Future<http.Response> _sendSample() {
-    return http.post(
-      Uri.parse(
-          "https://rhp8umja5e.execute-api.us-east-2.amazonaws.com/invoke_sklearn/invoke_sklearn"),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, List>{
-        'data': normBuffer,
-      }),
-    );
+  void _sendSample(List<double> normBufferClone) async {
+    if (callingReq) {
+      currentSampleIndex += 1;
+      return;
+    }
+
+    if (currentSampleIndex >= sampleDelayMultiplier) {
+      callingReq = true;
+
+      http.Response response = await http.post(
+        Uri.parse(
+            "https://rhp8umja5e.execute-api.us-east-2.amazonaws.com/invoke_sklearn/invoke_sklearn"),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, List>{
+          'data': normBufferClone,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        if (predictions.containsKey(response.body)) {
+          predictions.update(response.body, (value) => value + 1);
+        } else {
+          predictions[response.body] = 1;
+        }
+
+        // print("body $response.body");
+      } else {
+        // print("status");
+        // print(response.statusCode);
+      }
+
+      int maxValue = -1;
+      String maxKey = "";
+
+      predictions.forEach((key, value) {
+        if (value > maxValue) {
+          maxValue = value;
+          maxKey = key;
+        }
+      });
+
+      winnerClass = maxKey;
+
+      callingReq = false;
+    }
+
+    predictions.forEach((key, value) {
+      // print("for class $key value is $value");
+    });
+
+    if (currentSampleIndex >= sampleDelayMultiplier) {
+      currentSampleIndex = 0;
+    } else {
+      currentSampleIndex += 1;
+      // print("sampleIndex+");
+    }
   }
 
   void _updateConnectionCountdown(Timer timer) {
@@ -103,7 +154,7 @@ class _ClientMonitorState extends State<ClientMonitor> {
     try {
       BluetoothConnection connection =
           await BluetoothConnection.toAddress('00:14:03:05:59:9C');
-      print('Connected to the device');
+      // print('Connected to the device');
 
       connection.input?.listen((Uint8List data) {
         if (exitConnection) {
@@ -121,7 +172,7 @@ class _ClientMonitorState extends State<ClientMonitor> {
 
           if (decodedData.contains('!')) {
             // movement
-            print('Device not placed properly');
+            // print('Device not placed properly');
           } else if (decodedData.contains('disconnect')) {}
 
           RegExp digitExp = RegExp(r'(\d)');
@@ -138,6 +189,7 @@ class _ClientMonitorState extends State<ClientMonitor> {
               time += 1;
 
               appendData.add(liveData);
+
               normBuffer.add(normX);
 
               // if norm buffer is full, send request to the endpoint and clear
@@ -147,24 +199,7 @@ class _ClientMonitorState extends State<ClientMonitor> {
                   bufferStr = "";
                 });
 
-                // send request to the endpoint
-                print('req');
-                final response = await _sendSample();
-
-                if (response.statusCode == 200 &&
-                    currentSampleIndex == sampleDelayMultiplier) {
-                  if (predictions.containsKey(response.body)) {
-                    predictions.update(response.body, (value) => value + 1);
-                  } else {
-                    predictions[response.body] = 1;
-                  }
-
-                  currentSampleIndex = 0;
-                }
-
-                predictions.forEach((key, value) {
-                  print("for class $key value is $value");
-                });
+                _sendSample([...normBuffer]);
 
                 currentSampleIndex += 1;
                 normBuffer.clear();
@@ -201,7 +236,7 @@ class _ClientMonitorState extends State<ClientMonitor> {
           });
         }
       }).onDone(() {
-        print('Disconnected by remote request');
+        // print('Disconnected by remote request');
       });
     } catch (exception) {
       connected = false;
@@ -317,6 +352,8 @@ class _ClientMonitorState extends State<ClientMonitor> {
               primaryXAxis: NumericAxis(isVisible: false),
             ),
           ),
+          if (predictions[winnerClass] != null)
+            Text("winner is $winnerClass for ${predictions[winnerClass]!}")
         ],
       ),
     );

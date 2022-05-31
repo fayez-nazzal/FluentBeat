@@ -138,7 +138,7 @@ class _SignupState extends State<Signup> {
       setState(() {
         message = e.message;
 
-        print(e);
+        // print(e);
       });
     }
   }
