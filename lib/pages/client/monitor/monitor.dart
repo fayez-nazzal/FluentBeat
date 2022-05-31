@@ -2,15 +2,18 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
 import 'package:fluent_beat/pages/client/monitor/LiveData.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
-import 'package:get/get_connect/http/src/response/response.dart';
+import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:http/http.dart' as http;
 
 class ClientMonitor extends StatefulWidget {
-  ClientMonitor({Key? key}) : super(key: key);
+  final AuthUser user;
+
+  const ClientMonitor({Key? key, required this.user}) : super(key: key);
 
   @override
   State<ClientMonitor> createState() => _ClientMonitorState();
@@ -18,7 +21,10 @@ class ClientMonitor extends StatefulWidget {
 
 class _ClientMonitorState extends State<ClientMonitor> {
   List<double> normBuffer = <double>[];
+  List<double> bpmBuffer = <double>[];
+  double normBufferMax = -1;
   int normBufferIndex = 0;
+  int renderedBPM = 0;
   String bufferStr = "";
   String normStr = "";
   bool isTakingSample = false;
@@ -26,15 +32,13 @@ class _ClientMonitorState extends State<ClientMonitor> {
   List<LiveData> appendData = <LiveData>[];
   Timer? timer;
   ChartSeriesController? _chartSeriesController;
-  final int chartLimit = 68;
+  final int chartLimit = 100;
   late int time;
   bool exitConnection = false;
   bool connected = false;
   bool error = false;
   final int connectionCountdownMax = 12;
   int connectionCountdown = 0;
-  bool placedProperly = false;
-  int bpm = 0;
 
   // samples will be sent every ( 1.5 * this variable  ) seconds
   final int sampleDelayMultiplier = 1;
@@ -45,7 +49,7 @@ class _ClientMonitorState extends State<ClientMonitor> {
 
   // for normalizing data
   final int xMin = 200;
-  final int xMax = 1000;
+  final int xMax = 880;
 
   String winnerClass = "";
 
@@ -63,6 +67,53 @@ class _ClientMonitorState extends State<ClientMonitor> {
     timer = Timer.periodic(const Duration(milliseconds: 8), _updateDataSource);
   }
 
+  int _getBPM(List<double> prevNormBuffer) {
+    int bpm = 0;
+
+    // get max in prevNormBuffer
+    for (var element in prevNormBuffer) {
+      if (element > normBufferMax) {
+        normBufferMax = element;
+      }
+    }
+
+    bpmBuffer = [...bpmBuffer, ...prevNormBuffer];
+
+    // 7500 = 60 seconds ( 1 minute ) to get bpm per minute
+    if (bpmBuffer.length >= 750) {
+      // get the bpm from the array
+      bool reachedHighRecently = false;
+      print("max buffer");
+
+      for (var element in bpmBuffer) {
+        if (!reachedHighRecently &&
+            element >= normBufferMax - 0.03 &&
+            element <= normBufferMax + 0.06) {
+          bpm += 1;
+          reachedHighRecently = true;
+        }
+
+        if (element < normBufferMax - 0.3) {
+          reachedHighRecently = false;
+        }
+      }
+
+      bpm = bpm * 10;
+
+      if (bpm < 25 || bpm > 300) {
+        print(bpm);
+        bpm = 0;
+        bpmBuffer = [];
+
+        throw Exception('Movement Or silent detected');
+      }
+
+      bpmBuffer = [];
+    }
+
+    return bpm;
+  }
+
   void _sendSample(List<double> normBufferClone) async {
     if (callingReq) {
       currentSampleIndex += 1;
@@ -70,16 +121,29 @@ class _ClientMonitorState extends State<ClientMonitor> {
     }
 
     if (currentSampleIndex >= sampleDelayMultiplier) {
-      callingReq = true;
+      late int bpm;
 
+      try {
+        // get bpm for this normBuffer..
+        bpm = _getBPM(normBufferClone);
+      } catch (e) {
+        normBuffer = [];
+        print(e);
+        return;
+      }
+
+      callingReq = true;
       http.Response response = await http.post(
         Uri.parse(
             "https://rhp8umja5e.execute-api.us-east-2.amazonaws.com/invoke_sklearn/invoke_sklearn"),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
-        body: jsonEncode(<String, List>{
+        body: jsonEncode(<String, dynamic>{
           'data': normBufferClone,
+          'user_id': widget.user.userId,
+          'bpm': bpm,
+          'date': DateFormat.yMd().format(DateTime.now())
         }),
       );
 
@@ -88,12 +152,19 @@ class _ClientMonitorState extends State<ClientMonitor> {
           predictions.update(response.body, (value) => value + 1);
         } else {
           predictions[response.body] = 1;
+
+          // if not class4, update bpm
+          if (response.body.toString() != "4") {
+            setState(() {
+              renderedBPM = bpm;
+            });
+          }
         }
 
         // print("body $response.body");
       } else {
-        // print("status");
-        // print(response.statusCode);
+        print("ERROR, status");
+        print(response.statusCode);
       }
 
       int maxValue = -1;
@@ -107,7 +178,6 @@ class _ClientMonitorState extends State<ClientMonitor> {
       });
 
       winnerClass = maxKey;
-
       callingReq = false;
     }
 
@@ -176,7 +246,6 @@ class _ClientMonitorState extends State<ClientMonitor> {
           } else if (decodedData.contains('disconnect')) {}
 
           RegExp digitExp = RegExp(r'(\d)');
-          RegExp letterExp = RegExp(r'(E)'); // only E letter
 
           decodedData.split("").forEach((element) async {
             if (isTakingSample &&
@@ -184,6 +253,7 @@ class _ClientMonitorState extends State<ClientMonitor> {
                 bufferStr.startsWith("S") &&
                 bufferStr.endsWith("S")) {
               int x = int.parse(bufferStr.substring(1, bufferStr.length - 1));
+
               double normX = (x - xMin) / (xMax - xMin);
               LiveData liveData = LiveData(time, normX);
               time += 1;
@@ -253,7 +323,7 @@ class _ClientMonitorState extends State<ClientMonitor> {
   }
 
   void _updateDataSource(Timer timer) {
-    if (appendData.length == 0) return;
+    if (appendData.isEmpty) return;
 
     chartData.add(appendData[0]);
     chartData.removeAt(0);
@@ -269,9 +339,10 @@ class _ClientMonitorState extends State<ClientMonitor> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("My Heart"),
+        title: const Text("My Heart"),
         actions: [
-          IconButton(onPressed: () {}, icon: Icon(Icons.chat_bubble_rounded)),
+          IconButton(
+              onPressed: () {}, icon: const Icon(Icons.chat_bubble_rounded)),
         ],
       ),
       body: Column(
@@ -310,7 +381,7 @@ class _ClientMonitorState extends State<ClientMonitor> {
                           ? Colors.green
                           : Colors.red,
                 ),
-                Padding(padding: const EdgeInsets.only(right: 6)),
+                const Padding(padding: EdgeInsets.only(right: 6)),
                 Text(
                   error
                       ? "Can't connect to the ECG device."
@@ -330,7 +401,7 @@ class _ClientMonitorState extends State<ClientMonitor> {
             ),
           ),
           Padding(
-            padding: EdgeInsets.symmetric(vertical: 52),
+            padding: const EdgeInsets.symmetric(vertical: 52),
             child: SfCartesianChart(
               series: [
                 FastLineSeries<LiveData, int>(
@@ -353,7 +424,10 @@ class _ClientMonitorState extends State<ClientMonitor> {
             ),
           ),
           if (predictions[winnerClass] != null)
-            Text("winner is $winnerClass for ${predictions[winnerClass]!}")
+            Text("winner is $winnerClass for ${predictions[winnerClass]!}"),
+          Text("bpm is $renderedBPM"),
+          Text("Length of bpm buffer ${bpmBuffer.length}"),
+          Text("Max normBuff $normBufferMax")
         ],
       ),
     );

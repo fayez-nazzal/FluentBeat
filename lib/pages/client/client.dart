@@ -15,13 +15,17 @@ class ClientPage extends StatefulWidget {
 
 class _ClientPageState extends State<ClientPage> {
   int currentIndex = 0;
+  late dynamic screens;
 
-  final screens = [
-    ClientDashboard(),
-    ClientMonitor(),
-    Text("Revisions"),
-    Text("Settings"),
-  ];
+  @override
+  void initState() {
+    screens = [
+      ClientDashboard(),
+      ClientMonitor(user: widget.user),
+      Text("Revisions"),
+      Text("Settings"),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {

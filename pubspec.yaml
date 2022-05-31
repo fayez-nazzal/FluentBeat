@@ -37,6 +37,7 @@ dependencies:
   amplify_flutter: ^0.5.1
   amplify_auth_cognito: ^0.5.1
   get: ^4.6.5
+  intl: ^0.17.0
 
 dev_dependencies:
   flutter_test:
