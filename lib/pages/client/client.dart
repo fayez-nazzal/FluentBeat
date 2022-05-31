@@ -2,6 +2,8 @@ import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
 import 'package:fluent_beat/pages/client/monitor/monitor.dart';
 import 'package:flutter/material.dart';
 
+import 'dashboard/dashboard.dart';
+
 class ClientPage extends StatefulWidget {
   final AuthUser user;
 
@@ -15,7 +17,7 @@ class _ClientPageState extends State<ClientPage> {
   int currentIndex = 0;
 
   final screens = [
-    Text("Dashboard"),
+    ClientDashboard(),
     ClientMonitor(),
     Text("Revisions"),
     Text("Settings"),
