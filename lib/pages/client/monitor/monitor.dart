@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
-
 import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
 import 'package:fluent_beat/pages/client/monitor/LiveData.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +8,7 @@ import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class ClientMonitor extends StatefulWidget {
   final AuthUser user;
@@ -22,16 +22,10 @@ class ClientMonitor extends StatefulWidget {
 class _ClientMonitorState extends State<ClientMonitor> {
   List<double> normBuffer = <double>[];
   List<double> bpmBuffer = <double>[];
-  double bpmBufferMax = -1;
-  int normBufferIndex = 0;
   int heartrate = 0;
   String bufferStr = "";
-  String normStr = "";
-  bool isTakingSample = false;
   List<LiveData> chartData = <LiveData>[];
   List<LiveData> appendData = <LiveData>[];
-  Timer? timer;
-  Timer? bpmTimer;
   ChartSeriesController? _chartSeriesController;
   final int chartLimit = 100;
   late int time;
@@ -40,6 +34,11 @@ class _ClientMonitorState extends State<ClientMonitor> {
   bool error = false;
   final int connectionCountdownMax = 12;
   int connectionCountdown = 0;
+  Timer? timer;
+  Timer? bpmTimer;
+  Timer? sampleTimer;
+  double normBufferMax = -1;
+  int samplesPassed = 0;
 
   // samples will be sent every ( 1.5 * this variable  ) seconds
   final int sampleDelayMultiplier = 1;
@@ -48,11 +47,10 @@ class _ClientMonitorState extends State<ClientMonitor> {
   Map<String, int> predictions = {};
 
   // for normalizing data
-  final int xMin = 250;
-  final int xMax = 650;
+  int xMin = 250;
+  int xMax = 650;
 
   String winnerClass = "";
-
   String warning = "";
 
   @override
@@ -66,18 +64,17 @@ class _ClientMonitorState extends State<ClientMonitor> {
     });
 
     time = chartData.length;
-    timer = Timer.periodic(const Duration(milliseconds: 10), _updateDataSource);
     bpmTimer = Timer.periodic(const Duration(seconds: 1), _updateBPM);
-    bpmTimer = Timer.periodic(const Duration(seconds: 5), _attemptPredict);
+    sampleTimer = Timer.periodic(const Duration(seconds: 5), _attemptPredict);
   }
 
   int secs = 0;
 
   void _updateBPM(Timer timer) {
-    int bpm = 0;
-    print('length ${bpmBuffer.length}');
-
     if (bpmBuffer.isNotEmpty) print('seconds ${secs++}');
+
+    int bpm = 0;
+    double bpmBufferMax = -1;
 
     if (bpmBuffer.length >= 740) {
       for (var element in bpmBuffer) {
@@ -194,7 +191,12 @@ class _ClientMonitorState extends State<ClientMonitor> {
     try {
       BluetoothConnection connection =
           await BluetoothConnection.toAddress('00:14:03:05:59:9C');
-      // print('Connected to the device');
+
+      // if we get there, should be connected
+      timer =
+          Timer.periodic(const Duration(milliseconds: 8), _updateDataSource);
+
+      appendData = [];
 
       connection.input?.listen((Uint8List data) {
         if (exitConnection) {
@@ -223,7 +225,7 @@ class _ClientMonitorState extends State<ClientMonitor> {
               if (data.contains("!") || int.parse(data) == 0) {
                 normBuffer = [];
                 bpmBuffer = [];
-
+                appendData = [];
                 warning =
                     "Body movement or incorrect sensor placement is detected, adjust your position for a proper measurement";
 
@@ -231,11 +233,25 @@ class _ClientMonitorState extends State<ClientMonitor> {
               } else {
                 warning = "";
                 int x = int.parse(data);
+
+                samplesPassed++;
+
+                // if 1000 samples passed ( 8 seconds, we cn update min max )
+                if (samplesPassed >= 1000) {
+                  if (x > xMax && x < 900)
+                    xMax = x;
+                  else if (x < xMin && x > 0) xMin = x;
+
+                  samplesPassed = 1;
+                }
+
                 double normX = (x - xMin) / (xMax - xMin);
-                LiveData liveData = LiveData(time, normX);
                 time += 1;
 
-                appendData.add(liveData);
+                if (appendData.length < 10) {
+                  LiveData liveData = LiveData(time, normX);
+                  appendData.add(liveData);
+                }
 
                 // for bpm measurement
                 bpmBuffer.add(normX);
@@ -245,10 +261,6 @@ class _ClientMonitorState extends State<ClientMonitor> {
 
                 bufferStr = "E";
               }
-            }
-
-            if (element == "E") {
-              isTakingSample = false;
             }
 
             if (element == "E" || digitExp.hasMatch(element)) {
@@ -376,8 +388,30 @@ class _ClientMonitorState extends State<ClientMonitor> {
           ),
           if (predictions[winnerClass] != null)
             Text("winner is $winnerClass for ${predictions[winnerClass]!}"),
-          Text("bpm is $heartrate"),
-          Text("Max normBuff $bpmBufferMax"),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SpinKitPumpingHeart(
+                color: const Color(0xffF9595F),
+                size: 24,
+                duration: heartrate > 120
+                    ? const Duration(milliseconds: 300)
+                    : heartrate > 100
+                        ? const Duration(milliseconds: 500)
+                        : heartrate > 90
+                            ? const Duration(milliseconds: 600)
+                            : heartrate > 80
+                                ? const Duration(milliseconds: 700)
+                                : heartrate > 70
+                                    ? const Duration(milliseconds: 880)
+                                    : const Duration(milliseconds: 1000),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text("$heartrate BPM"),
+              )
+            ],
+          ),
           Text(warning)
         ],
       ),
