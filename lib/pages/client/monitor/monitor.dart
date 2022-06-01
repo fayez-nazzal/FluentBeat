@@ -22,15 +22,16 @@ class ClientMonitor extends StatefulWidget {
 class _ClientMonitorState extends State<ClientMonitor> {
   List<double> normBuffer = <double>[];
   List<double> bpmBuffer = <double>[];
-  double normBufferMax = -1;
+  double bpmBufferMax = -1;
   int normBufferIndex = 0;
-  int renderedBPM = 0;
+  int heartrate = 0;
   String bufferStr = "";
   String normStr = "";
   bool isTakingSample = false;
   List<LiveData> chartData = <LiveData>[];
   List<LiveData> appendData = <LiveData>[];
   Timer? timer;
+  Timer? bpmTimer;
   ChartSeriesController? _chartSeriesController;
   final int chartLimit = 100;
   late int time;
@@ -42,16 +43,17 @@ class _ClientMonitorState extends State<ClientMonitor> {
 
   // samples will be sent every ( 1.5 * this variable  ) seconds
   final int sampleDelayMultiplier = 1;
-  int currentSampleIndex = 0;
   bool callingReq = false;
 
   Map<String, int> predictions = {};
 
   // for normalizing data
-  final int xMin = 200;
-  final int xMax = 880;
+  final int xMin = 250;
+  final int xMax = 650;
 
   String winnerClass = "";
+
+  String warning = "";
 
   @override
   void initState() {
@@ -64,133 +66,101 @@ class _ClientMonitorState extends State<ClientMonitor> {
     });
 
     time = chartData.length;
-    timer = Timer.periodic(const Duration(milliseconds: 8), _updateDataSource);
+    timer = Timer.periodic(const Duration(milliseconds: 10), _updateDataSource);
+    bpmTimer = Timer.periodic(const Duration(seconds: 1), _updateBPM);
+    bpmTimer = Timer.periodic(const Duration(seconds: 5), _attemptPredict);
   }
 
-  int _getBPM(List<double> prevNormBuffer) {
+  int secs = 0;
+
+  void _updateBPM(Timer timer) {
     int bpm = 0;
+    print('length ${bpmBuffer.length}');
 
-    // get max in prevNormBuffer
-    for (var element in prevNormBuffer) {
-      if (element > normBufferMax) {
-        normBufferMax = element;
+    if (bpmBuffer.isNotEmpty) print('seconds ${secs++}');
+
+    if (bpmBuffer.length >= 740) {
+      for (var element in bpmBuffer) {
+        if (element > bpmBufferMax) {
+          bpmBufferMax = element;
+        }
       }
-    }
 
-    bpmBuffer = [...bpmBuffer, ...prevNormBuffer];
-
-    // 7500 = 60 seconds ( 1 minute ) to get bpm per minute
-    if (bpmBuffer.length >= 750) {
       // get the bpm from the array
       bool reachedHighRecently = false;
-      print("max buffer");
 
       for (var element in bpmBuffer) {
         if (!reachedHighRecently &&
-            element >= normBufferMax - 0.03 &&
-            element <= normBufferMax + 0.06) {
+            element >= bpmBufferMax - 0.2 &&
+            element <= bpmBufferMax + 0.2) {
           bpm += 1;
           reachedHighRecently = true;
         }
 
-        if (element < normBufferMax - 0.3) {
+        if (element < bpmBufferMax - 0.3) {
           reachedHighRecently = false;
         }
       }
 
-      bpm = bpm * 10;
-
-      if (bpm < 25 || bpm > 300) {
-        print(bpm);
-        bpm = 0;
-        bpmBuffer = [];
-
-        throw Exception('Movement Or silent detected');
-      }
+      print(bpm * 10);
 
       bpmBuffer = [];
-    }
 
-    return bpm;
+      setState(() {
+        heartrate = bpm * 10;
+      });
+    }
   }
 
-  void _sendSample(List<double> normBufferClone) async {
-    if (callingReq) {
-      currentSampleIndex += 1;
-      return;
-    }
+  void _attemptPredict(Timer timer) async {
+    if (normBuffer.length < 187) return;
+    if (heartrate < 20) return;
+    if (callingReq) return;
 
-    if (currentSampleIndex >= sampleDelayMultiplier) {
-      late int bpm;
+    callingReq = true;
 
-      try {
-        // get bpm for this normBuffer..
-        bpm = _getBPM(normBufferClone);
-      } catch (e) {
-        normBuffer = [];
-        print(e);
-        return;
-      }
+    http.Response response = await http.post(
+      Uri.parse(
+          "https://rhp8umja5e.execute-api.us-east-2.amazonaws.com/invoke_sklearn/invoke_sklearn"),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, dynamic>{
+        'data': normBuffer.sublist(0, 187),
+        'user_id': widget.user.userId,
+        'bpm': heartrate,
+        'date': DateFormat.yMd().format(DateTime.now())
+      }),
+    );
 
-      callingReq = true;
-      http.Response response = await http.post(
-        Uri.parse(
-            "https://rhp8umja5e.execute-api.us-east-2.amazonaws.com/invoke_sklearn/invoke_sklearn"),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(<String, dynamic>{
-          'data': normBufferClone,
-          'user_id': widget.user.userId,
-          'bpm': bpm,
-          'date': DateFormat.yMd().format(DateTime.now())
-        }),
-      );
+    normBuffer = [];
 
-      if (response.statusCode == 200) {
-        if (predictions.containsKey(response.body)) {
-          predictions.update(response.body, (value) => value + 1);
-        } else {
-          predictions[response.body] = 1;
-
-          // if not class4, update bpm
-          if (response.body.toString() != "4") {
-            setState(() {
-              renderedBPM = bpm;
-            });
-          }
-        }
-
-        // print("body $response.body");
+    if (response.statusCode == 200) {
+      if (predictions.containsKey(response.body)) {
+        predictions.update(response.body, (value) => value + 1);
       } else {
-        print("ERROR, status");
-        print(response.statusCode);
+        predictions[response.body] = 1;
       }
-
-      int maxValue = -1;
-      String maxKey = "";
-
-      predictions.forEach((key, value) {
-        if (value > maxValue) {
-          maxValue = value;
-          maxKey = key;
-        }
-      });
-
-      winnerClass = maxKey;
-      callingReq = false;
+    } else {
+      print("ERROR, status");
+      print(response.statusCode);
     }
+
+    int maxValue = -1;
+    String maxKey = "";
 
     predictions.forEach((key, value) {
-      // print("for class $key value is $value");
+      if (value > maxValue) {
+        maxValue = value;
+        maxKey = key;
+      }
     });
 
-    if (currentSampleIndex >= sampleDelayMultiplier) {
-      currentSampleIndex = 0;
-    } else {
-      currentSampleIndex += 1;
-      // print("sampleIndex+");
-    }
+    setState(() {
+      winnerClass = maxKey;
+    });
+
+    callingReq = false;
   }
 
   void _updateConnectionCountdown(Timer timer) {
@@ -240,68 +210,49 @@ class _ClientMonitorState extends State<ClientMonitor> {
 
           String decodedData = ascii.decode(data);
 
-          if (decodedData.contains('!')) {
-            // movement
-            // print('Device not placed properly');
-          } else if (decodedData.contains('disconnect')) {}
-
           RegExp digitExp = RegExp(r'(\d)');
 
           decodedData.split("").forEach((element) async {
-            if (isTakingSample &&
-                bufferStr.length > 2 &&
-                bufferStr.startsWith("S") &&
-                bufferStr.endsWith("S")) {
-              int x = int.parse(bufferStr.substring(1, bufferStr.length - 1));
-
-              double normX = (x - xMin) / (xMax - xMin);
-              LiveData liveData = LiveData(time, normX);
-              time += 1;
-
-              appendData.add(liveData);
-
-              normBuffer.add(normX);
-
-              // if norm buffer is full, send request to the endpoint and clear
-              if (normBuffer.length == 187) {
-                setState(() {
-                  isTakingSample = false;
-                  bufferStr = "";
-                });
-
-                _sendSample([...normBuffer]);
-
-                currentSampleIndex += 1;
-                normBuffer.clear();
-              }
-
-              bufferStr = "S";
-            } else if (bufferStr.length > 2 &&
+            if (bufferStr.length > 2 &&
                 bufferStr.endsWith("E") &&
                 bufferStr.startsWith("E")) {
-              int x = int.parse(bufferStr.substring(1, bufferStr.length - 1));
-              double normX = (x - xMin) / (xMax - xMin);
-              LiveData liveData = LiveData(time, normX);
-              time += 1;
+              String data = bufferStr.substring(1, bufferStr.length - 1);
 
-              appendData.add(liveData);
+              // if those condition are met, movement may be hapened
+              // so throw the samples..next samples might be better
+              if (data.contains("!") || int.parse(data) == 0) {
+                normBuffer = [];
+                bpmBuffer = [];
 
-              bufferStr = "E";
+                warning =
+                    "Body movement or incorrect sensor placement is detected, adjust your position for a proper measurement";
+
+                return;
+              } else {
+                warning = "";
+                int x = int.parse(data);
+                double normX = (x - xMin) / (xMax - xMin);
+                LiveData liveData = LiveData(time, normX);
+                time += 1;
+
+                appendData.add(liveData);
+
+                // for bpm measurement
+                bpmBuffer.add(normX);
+
+                // for prediction
+                normBuffer.add(normX);
+
+                bufferStr = "E";
+              }
             }
 
             if (element == "E") {
               isTakingSample = false;
             }
 
-            if (element == "E" ||
-                element == "S" ||
-                digitExp.hasMatch(element)) {
+            if (element == "E" || digitExp.hasMatch(element)) {
               bufferStr += element;
-            }
-
-            if (element == "N") {
-              isTakingSample = !isTakingSample;
-              bufferStr = "";
             }
           });
         }
@@ -425,9 +376,9 @@ class _ClientMonitorState extends State<ClientMonitor> {
           ),
           if (predictions[winnerClass] != null)
             Text("winner is $winnerClass for ${predictions[winnerClass]!}"),
-          Text("bpm is $renderedBPM"),
-          Text("Length of bpm buffer ${bpmBuffer.length}"),
-          Text("Max normBuff $normBufferMax")
+          Text("bpm is $heartrate"),
+          Text("Max normBuff $bpmBufferMax"),
+          Text(warning)
         ],
       ),
     );
