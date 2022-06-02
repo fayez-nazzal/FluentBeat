@@ -194,7 +194,7 @@ class _ClientMonitorState extends State<ClientMonitor> {
 
       // if we get there, should be connected
       timer =
-          Timer.periodic(const Duration(milliseconds: 8), _updateDataSource);
+          Timer.periodic(const Duration(milliseconds: 9), _updateDataSource);
 
       appendData = [];
 
