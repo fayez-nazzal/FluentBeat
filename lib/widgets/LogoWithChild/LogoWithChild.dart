@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 
 class LogoWithChild extends StatelessWidget {
   final Widget? child;
-  const LogoWithChild({Key? key, this.child}) : super(key: key);
+
+  const LogoWithChild({
+    Key? key,
+    this.child,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -19,19 +23,16 @@ class LogoWithChild extends StatelessWidget {
         ),
         child: Scaffold(
             backgroundColor: Colors.transparent,
-            body: SizedBox(
-                height: double.infinity,
+            body: SafeArea(
                 child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.end,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Spacer(),
                         Image(image: AssetImage('images/FluentBeat.png')),
-                        Spacer(),
+                        const Text("Hello"),
                         child!,
-                        Spacer()
                       ],
                     )))));
   }

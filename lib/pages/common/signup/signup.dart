@@ -1,11 +1,15 @@
+import 'dart:convert';
+
 import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:fluent_beat/pages/client/client.dart';
-import 'package:fluent_beat/pages/common/login/login.dart';
-import 'package:fluent_beat/widgets/Input/Input.dart';
-import 'package:fluent_beat/widgets/LogoWithChild/LogoWithChild.dart';
+import 'package:fluent_beat/pages/common/signup/AccountInfo.dart';
+import 'package:fluent_beat/pages/common/signup/ExtraInfo.dart';
+import 'package:fluent_beat/pages/common/signup/toggles.dart';
+import 'package:fluent_beat/pages/common/signup/verfication.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 
 import '../../../widgets/Button/Button.dart';
 
@@ -13,18 +17,26 @@ class Signup extends StatefulWidget {
   Signup({Key? key}) : super(key: key);
 
   @override
-  State<Signup> createState() => _SignupState();
+  State<Signup> createState() => SignupState();
+
+  static SignupState? of(BuildContext context) =>
+      context.findAncestorStateOfType<SignupState>();
 }
 
-class _SignupState extends State<Signup> {
+class SignupState extends State<Signup> {
   String name = "";
   String username = "";
   String password = "";
   String message = "";
   String confirmPassword = "";
   String verficationCode = "";
+  String country = "";
+  String userType = "";
   late AuthUser user;
-
+  List<bool> toggleButtonsSelected = [false, false];
+  DateTime birthday = DateTime.now();
+  String gender = "Male";
+  List<String> genders = ["Male", "Female"];
   int currentIndex = 0;
   late List<Widget> pages;
 
@@ -44,62 +56,38 @@ class _SignupState extends State<Signup> {
   @override
   void initState() {
     super.initState();
-
-    checkUser();
-
-    pages = [
-      Column(
-        children: [
-          Input(
-              onChange: (txt) {
-                name = txt.trim();
-              },
-              labelText: "Name"),
-          Input(
-              onChange: (txt) {
-                username = txt.trim();
-              },
-              labelText: "Email"),
-          Input(
-            onChange: (txt) {
-              password = txt;
-            },
-            labelText: "Password",
-            password: true,
-          ),
-          Input(
-            onChange: (txt) {
-              confirmPassword = txt;
-            },
-            labelText: "Confirm Password",
-            password: true,
-          ),
-        ],
-      ),
-      Column(
-        children: [
-          const Padding(
-            padding: EdgeInsets.only(bottom: 16.0),
-            child: Text("Please, check your Email for the verfication code.",
-                style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w500)),
-          ),
-          Input(
-              onChange: (txt) {
-                verficationCode = txt.trim();
-              },
-              labelText: "Verfication Code"),
-          Button(
-              bg: 0xffffffff,
-              text: "Resend Code",
-              onPrimary: 0xffff7f7f,
-              onPress: resendVerficationCode),
-        ],
-      )
-    ];
   }
+
+  List<Step> getSteps() => [
+        Step(
+            isActive: currentIndex == 0,
+            title: const Text("Account"),
+            content: Scrollbar(
+              child: ListView(
+                  shrinkWrap: true,
+                  physics: ScrollPhysics(),
+                  children: [
+                    Toggles(
+                      toggleButtonsSelected: toggleButtonsSelected,
+                    ),
+                    AccountInfo(),
+                  ]),
+            )),
+        Step(
+            isActive: currentIndex == 1,
+            title: const Text("Extra Info"),
+            content: Scrollbar(
+              child: ListView(
+                  shrinkWrap: true,
+                  physics: ScrollPhysics(),
+                  children: [ExtraInfo()]),
+            )),
+        Step(
+            isActive: currentIndex == 2,
+            title: const Text("Verify"),
+            content:
+                Expanded(child: SingleChildScrollView(child: Verfication())))
+      ];
 
   void signUp() async {
     bool matchPasswords = password == confirmPassword;
@@ -124,16 +112,13 @@ class _SignupState extends State<Signup> {
       Map<CognitoUserAttributeKey, String> userAttributes = {
         CognitoUserAttributeKey.name: name,
         CognitoUserAttributeKey.email: username,
+        const CognitoUserAttributeKey.custom("userType"): userType,
       };
 
       SignUpResult signupResult = await Amplify.Auth.signUp(
           username: username,
           password: password,
           options: CognitoSignUpOptions(userAttributes: userAttributes));
-
-      setState(() {
-        currentIndex = 1;
-      });
     } on AuthException catch (e) {
       setState(() {
         message = e.message;
@@ -144,25 +129,13 @@ class _SignupState extends State<Signup> {
   }
 
   void confirmSignup() async {
-    if (verficationCode == "") {
-      setState(() {
-        message = "Verfication code is required";
-      });
-
-      return;
-    }
-
     try {
       await Amplify.Auth.confirmSignUp(
           username: username, confirmationCode: verficationCode);
 
+      print("sss");
+
       await Amplify.Auth.signIn(username: username, password: password);
-
-      user = await Amplify.Auth.getCurrentUser();
-
-      setState(() {
-        Get.to(ClientPage(user: user));
-      });
     } on AuthException catch (e) {
       setState(() {
         message = e.message;
@@ -170,34 +143,107 @@ class _SignupState extends State<Signup> {
     }
   }
 
-  void resendVerficationCode() async {
-    try {
-      await Amplify.Auth.resendSignUpCode(username: username);
-    } on AuthException catch (e) {
+  void onStepContinue() async {
+    if (currentIndex == 0) {
+      // TODO, validate all fields
+      print("info");
+      print(userType);
+      print(name);
+      print(username);
+      print(password);
+      print(confirmPassword);
+      signUp();
+    } else if (currentIndex == 1) {
+      // TODO, just validate attribute
+    } else if (currentIndex == 2) {
+      // TODO, make sure verification code is provided
+      print(verficationCode);
+      confirmSignup();
+
+      // check if user is signed in
+      await Amplify.Auth.getCurrentUser().then((user) async {
+        var client = http.Client();
+        var response = await client.post(
+            Uri.parse(
+                "https://rhp8umja5e.execute-api.us-east-2.amazonaws.com/invoke_sklearn/new_user"),
+            headers: <String, String>{
+              'Content-Type': 'application/json; charset=UTF-8',
+            },
+            body: jsonEncode(<String, String>{
+              'cognito_id': user.userId,
+              'user_type': userType,
+              'name': name,
+              'email_address': username,
+              // birth-date in format YYYY-MM-DD
+              'birthday': birthday.toString().substring(0, 10),
+              'user_country': country,
+              'gender': gender
+            }));
+
+        var decodedResponse =
+            jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+
+        print(decodedResponse);
+
+        setState(() {
+          Get.to(ClientPage(user: user));
+        });
+      }).onError((error, stackTrace) {
+        setState(() {
+          message = error.toString();
+        });
+      });
+    }
+
+    if (currentIndex < 2) {
       setState(() {
-        message = e.message;
+        currentIndex++;
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return LogoWithChild(
-        child: Column(
-      children: [
-        pages[currentIndex],
-        Text(message,
-            style: const TextStyle(
-                color: Colors.red, fontWeight: FontWeight.w500, fontSize: 18)),
-        Padding(
-          padding: const EdgeInsets.only(top: 2.0),
-          child: Button(
-              bg: 0xffff7f7f,
-              text: "Sign Up",
-              onPrimary: 0xffffff,
-              onPress: verficationCode == "" ? signUp : confirmSignup),
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color.fromARGB(255, 240, 230, 234),
+            Color.fromARGB(255, 250, 214, 252)
+          ],
         ),
-      ],
-    ));
+      ),
+      child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: SafeArea(
+              child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Image(image: AssetImage('images/FluentBeat.png')),
+                      Expanded(
+                        child: Stepper(
+                            type: StepperType.horizontal,
+                            steps: getSteps(),
+                            currentStep: currentIndex,
+                            onStepTapped: null,
+                            onStepCancel: null,
+                            controlsBuilder: (BuildContext context,
+                                ControlsDetails details) {
+                              return TextButton(
+                                  onPressed: details.onStepContinue,
+                                  child: Button(
+                                      bg: 0xFFff6b6b,
+                                      text: "Continue",
+                                      onPress: onStepContinue));
+                            }),
+                      )
+                    ],
+                  )))),
+    );
   }
 }
