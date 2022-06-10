@@ -128,14 +128,10 @@ class SignupState extends State<Signup> {
     }
   }
 
-  void confirmSignup() async {
+  Future<void> confirmSignup() async {
     try {
       await Amplify.Auth.confirmSignUp(
           username: username, confirmationCode: verficationCode);
-
-      print("sss");
-
-      await Amplify.Auth.signIn(username: username, password: password);
     } on AuthException catch (e) {
       setState(() {
         message = e.message;
@@ -158,10 +154,13 @@ class SignupState extends State<Signup> {
     } else if (currentIndex == 2) {
       // TODO, make sure verification code is provided
       print(verficationCode);
-      confirmSignup();
+      await confirmSignup();
 
       // check if user is signed in
-      await Amplify.Auth.getCurrentUser().then((user) async {
+      await Amplify.Auth.signIn(username: username, password: password)
+          .then((value) async {
+        var user = await Amplify.Auth.getCurrentUser();
+
         var client = http.Client();
         var response = await client.post(
             Uri.parse(
@@ -185,9 +184,10 @@ class SignupState extends State<Signup> {
 
         print(decodedResponse);
 
-        setState(() {
-          Get.to(ClientPage(user: user));
-        });
+        if (response.statusCode == 200)
+          setState(() {
+            Get.to(ClientPage(user: user));
+          });
       }).onError((error, stackTrace) {
         setState(() {
           message = error.toString();
