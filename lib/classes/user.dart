@@ -25,3 +25,37 @@ class User {
       email: json['email'],
       join_date: json['join_date']);
 }
+
+class Patient extends User {
+  final String? request_doctor_id;
+
+  const Patient(
+      {required this.request_doctor_id,
+      required id,
+      required name,
+      required user_country,
+      required birth_date,
+      required gender,
+      required email,
+      required join_date})
+      : super(
+          id: id,
+          name: name,
+          user_country: user_country,
+          birth_date: birth_date,
+          gender: gender,
+          email: email,
+          join_date: join_date,
+        );
+
+  static Patient fromJson(json) => Patient(
+        id: json['id'],
+        name: json['name'],
+        user_country: json['user_country'],
+        birth_date: json['birth_date'],
+        gender: json['gender'],
+        email: json['email'],
+        join_date: json['join_date'],
+        request_doctor_id: json['request_doctor_id'],
+      );
+}

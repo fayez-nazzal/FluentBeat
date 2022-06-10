@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
+import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:fluent_beat/classes/storage.dart';
 import 'package:fluent_beat/pages/client/monitor/LiveData.dart';
 import 'package:flutter/material.dart';
@@ -27,6 +28,29 @@ class _DoctorPatientsState extends State<DoctorPatients> {
   int fetchCount = 0;
   List<ListTile> patientList = [];
 
+  void requestPatient(String patientId) async {
+    String doctorId = (await Amplify.Auth.getCurrentUser()).userId;
+
+    http.Response response = await http.post(
+        Uri.parse(
+            'https://rhp8umja5e.execute-api.us-east-2.amazonaws.com/invoke_sklearn/request_patient'),
+        headers: {
+          HttpHeaders.contentTypeHeader: 'application/json',
+        },
+        body: jsonEncode(
+            {'doctor_cognito_id': doctorId, 'patient_cognito_id': patientId}));
+
+    // decode the response
+    Map<String, dynamic> responseJson = jsonDecode(response.body);
+
+    // check if the request was successful
+    if (responseJson['statusCode'] == 200) {
+      print("Success");
+    } else {
+      print("Error");
+    }
+  }
+
   void listPatients() async {
     if (patients != null) return;
 
@@ -50,7 +74,7 @@ class _DoctorPatientsState extends State<DoctorPatients> {
     var body = json.decode(decodedResponse['body']);
 
     // last, map the values taken from results to User class, this will result into a list of Users
-    patients = body.map(User.fromJson).toList();
+    patients = body.map(Patient.fromJson).toList();
 
     if (patients != null) {
       for (var patient in patients!) {
@@ -65,7 +89,11 @@ class _DoctorPatientsState extends State<DoctorPatients> {
           ListTile(
             leading: patientImage,
             title: Text(patient.name),
-            subtitle: Text(patient.id),
+            subtitle: Text(patient.join_date),
+            enabled: patient.request_doctor_id == null,
+            onTap: () {
+              requestPatient(patient.id);
+            },
           ),
         );
       }
