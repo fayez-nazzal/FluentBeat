@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../widgets/Button/Button.dart';
-import '../../common/home/home.dart';
+import '../../common/login/login.dart';
 
 class Settings extends StatelessWidget {
   const Settings({Key? key}) : super(key: key);
@@ -11,7 +11,7 @@ class Settings extends StatelessWidget {
   void signOut() async {
     await Amplify.Auth.signOut();
 
-    Get.to(StartHome());
+    Get.to(LoginPage());
   }
 
   @override

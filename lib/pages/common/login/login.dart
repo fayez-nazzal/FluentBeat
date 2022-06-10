@@ -3,7 +3,6 @@ import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:fluent_beat/pages/common/login/login.dart';
 import 'package:fluent_beat/pages/common/signup/signup.dart';
 import 'package:fluent_beat/widgets/Button/Button.dart';
-import 'package:fluent_beat/widgets/LogoWithChild/LogoWithChild.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -23,23 +22,6 @@ class _LoginPageState extends State<LoginPage> {
   String message = "";
 
   late AuthUser user;
-  void checkUser() async {
-    try {
-      user = await Amplify.Auth.getCurrentUser();
-
-      Get.to(ClientPage(user: user));
-    } on AuthException {
-      // nothing to do...
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    checkUser();
-  }
-
   void signIn() async {
     bool hasAllValues = username != "" && password != "";
 
