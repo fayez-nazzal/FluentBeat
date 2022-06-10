@@ -7,6 +7,7 @@ import 'package:fluent_beat/pages/common/signup/AccountInfo.dart';
 import 'package:fluent_beat/pages/common/signup/ExtraInfo.dart';
 import 'package:fluent_beat/pages/common/signup/toggles.dart';
 import 'package:fluent_beat/pages/common/signup/verfication.dart';
+import 'package:fluent_beat/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -50,10 +51,7 @@ class SignupPageState extends State<SignupPage> {
     try {
       user = await Amplify.Auth.getCurrentUser();
 
-      // if so, push to the client page
-      setState(() {
-        Get.to(ClientPage(user: user));
-      });
+      redirectUserToRelevantPage(user);
     } on AuthException {
       // nothing to do...
     }
