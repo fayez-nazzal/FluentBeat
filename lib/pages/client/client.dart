@@ -1,6 +1,7 @@
 import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
 import 'package:fluent_beat/pages/client/monitor/monitor.dart';
-import 'package:fluent_beat/pages/client/revisions/settings.dart';
+import 'package:fluent_beat/pages/client/revisions/revisions.dart';
+import 'package:fluent_beat/pages/client/settings/settings.dart';
 import 'package:flutter/material.dart';
 
 import 'dashboard/dashboard.dart';
@@ -23,7 +24,7 @@ class _ClientPageState extends State<ClientPage> {
     screens = [
       ClientDashboard(),
       ClientMonitor(user: widget.user),
-      Text("Revisions"),
+      Revisions(),
       Settings(),
     ];
   }
