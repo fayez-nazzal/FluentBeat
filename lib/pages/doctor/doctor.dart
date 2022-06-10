@@ -2,7 +2,7 @@ import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
 import 'package:fluent_beat/pages/client/monitor/monitor.dart';
 import 'package:fluent_beat/pages/client/revisions/revisions.dart';
 import 'package:fluent_beat/pages/client/settings/settings.dart';
-import 'package:fluent_beat/pages/doctor/patients/monitor.dart';
+import 'package:fluent_beat/pages/doctor/patients/pateints.dart';
 import 'package:flutter/material.dart';
 
 import 'dashboard/dashboard.dart';
