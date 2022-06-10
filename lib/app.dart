@@ -3,6 +3,7 @@ import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:amplify_storage_s3/amplify_storage_s3.dart';
 import 'package:fluent_beat/pages/client/client.dart';
 import 'package:fluent_beat/pages/common/login/login.dart';
+import 'package:fluent_beat/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -24,7 +25,7 @@ class _AppState extends State<App> {
     try {
       user = await Amplify.Auth.getCurrentUser();
 
-      Get.to(ClientPage(user: user));
+      redirectUserToRelevantPage(user);
     } on AuthException {
       // amplify would be configured if we reach here, so redirect to Login page
       setState(() {

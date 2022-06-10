@@ -2,10 +2,12 @@ import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:fluent_beat/pages/common/login/login.dart';
 import 'package:fluent_beat/pages/common/signup/signup.dart';
+import 'package:fluent_beat/pages/doctor/doctor.dart';
 import 'package:fluent_beat/widgets/Button/Button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../utils.dart';
 import '../../../widgets/Input/Input.dart';
 import '../../client/client.dart';
 
@@ -37,9 +39,11 @@ class _LoginPageState extends State<LoginPage> {
 
       user = await Amplify.Auth.getCurrentUser();
 
-      setState(() {
-        Get.to(ClientPage(user: user));
-      });
+      // get userType attribute from user
+      // if userType is "USER", push to client page
+      // if userType is "DOCTOR", push to doctor page
+
+      redirectUserToRelevantPage(user);
     } on AuthException catch (e) {
       setState(() {
         message = e.message;
