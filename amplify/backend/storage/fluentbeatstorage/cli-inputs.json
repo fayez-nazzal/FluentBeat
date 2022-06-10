@@ -1,0 +1,13 @@
+{
+  "resourceName": "fluentbeatstorage",
+  "policyUUID": "4fc28404",
+  "bucketName": "fluentbeatstorage",
+  "storageAccess": "auth",
+  "guestAccess": [],
+  "authAccess": [
+    "CREATE_AND_UPDATE",
+    "READ"
+  ],
+  "triggerFunction": "NONE",
+  "groupAccess": {}
+}

@@ -13,7 +13,8 @@
     },
     "categories": {
       "auth": {
-        "fluentbeatad9dfc38ad9dfc38": {}
+        "fluentbeatad9dfc38ad9dfc38": {},
+        "true": {}
       }
     }
   }
