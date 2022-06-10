@@ -29,24 +29,24 @@ class _AccountInfoState extends State<AccountInfo> {
         const SizedBox(height: 16),
         Input(
             onChange: (txt) {
-              Signup.of(context)!.name = txt.trim();
+              SignupPage.of(context)!.name = txt.trim();
             },
             labelText: "Name"),
         Input(
             onChange: (txt) {
-              Signup.of(context)!.username = txt.trim();
+              SignupPage.of(context)!.username = txt.trim();
             },
             labelText: "Email"),
         Input(
           onChange: (txt) {
-            Signup.of(context)!.password = txt;
+            SignupPage.of(context)!.password = txt;
           },
           labelText: "Password",
           password: true,
         ),
         Input(
           onChange: (txt) {
-            Signup.of(context)!.confirmPassword = txt;
+            SignupPage.of(context)!.confirmPassword = txt;
           },
           labelText: "Confirm Password",
           password: true,

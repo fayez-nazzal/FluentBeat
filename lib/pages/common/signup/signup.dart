@@ -13,17 +13,21 @@ import 'package:http/http.dart' as http;
 
 import '../../../widgets/Button/Button.dart';
 
-class Signup extends StatefulWidget {
-  Signup({Key? key}) : super(key: key);
+class SignupPage extends StatefulWidget {
+  String username = "";
+  String password = "";
+
+  SignupPage({Key? key, this.username = "", this.password = ""})
+      : super(key: key);
 
   @override
-  State<Signup> createState() => SignupState();
+  State<SignupPage> createState() => SignupPageState();
 
-  static SignupState? of(BuildContext context) =>
-      context.findAncestorStateOfType<SignupState>();
+  static SignupPageState? of(BuildContext context) =>
+      context.findAncestorStateOfType<SignupPageState>();
 }
 
-class SignupState extends State<Signup> {
+class SignupPageState extends State<SignupPage> {
   String name = "";
   String username = "";
   String password = "";
@@ -39,6 +43,8 @@ class SignupState extends State<Signup> {
   List<String> genders = ["Male", "Female"];
   int currentIndex = 0;
   late List<Widget> pages;
+
+  SignupPageState({this.username = "", this.password = ""});
 
   void checkUser() async {
     try {
@@ -141,19 +147,11 @@ class SignupState extends State<Signup> {
 
   void onStepContinue() async {
     if (currentIndex == 0) {
-      // TODO, validate all fields
-      print("info");
-      print(userType);
-      print(name);
-      print(username);
-      print(password);
-      print(confirmPassword);
       signUp();
     } else if (currentIndex == 1) {
       // TODO, just validate attribute
     } else if (currentIndex == 2) {
       // TODO, make sure verification code is provided
-      print(verficationCode);
       await confirmSignup();
 
       // check if user is signed in

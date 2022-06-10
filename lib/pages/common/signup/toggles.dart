@@ -25,18 +25,18 @@ class _TogglesState extends State<Toggles> {
       const SizedBox(height: 16),
       ToggleButton(
           text: "Doctor",
-          selected: Signup.of(context)!.userType == "DOCTOR",
+          selected: SignupPage.of(context)!.userType == "DOCTOR",
           onPress: () {
             setState(() {
-              Signup.of(context)!.userType = "DOCTOR";
+              SignupPage.of(context)!.userType = "DOCTOR";
             });
           }),
       ToggleButton(
           text: "User",
-          selected: Signup.of(context)!.userType == "USER",
+          selected: SignupPage.of(context)!.userType == "USER",
           onPress: () {
             setState(() {
-              Signup.of(context)!.userType = "USER";
+              SignupPage.of(context)!.userType = "USER";
             });
           }),
     ]);

@@ -1,6 +1,6 @@
 import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
-import 'package:fluent_beat/pages/common/home/home.dart';
+import 'package:fluent_beat/pages/common/login/login.dart';
 import 'package:flutter/material.dart';
 
 import 'amplifyconfiguration.dart';
@@ -35,6 +35,6 @@ class _AppState extends State<App> {
 
   @override
   Widget build(BuildContext context) {
-    return StartHome();
+    return LoginPage();
   }
 }

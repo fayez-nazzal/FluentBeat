@@ -16,8 +16,8 @@ class Verfication extends StatefulWidget {
 class _VerficationState extends State<Verfication> {
   @override
   Widget build(BuildContext context) {
-    String message = Signup.of(context)!.message;
-    String username = Signup.of(context)!.username;
+    String message = SignupPage.of(context)!.message;
+    String username = SignupPage.of(context)!.username;
 
     void resendVerficationCode() async {
       try {
@@ -43,7 +43,7 @@ class _VerficationState extends State<Verfication> {
         Input(
             onChange: (txt) {
               setState(() {
-                Signup.of(context)!.verficationCode = txt.trim();
+                SignupPage.of(context)!.verficationCode = txt.trim();
               });
             },
             labelText: "Verfication Code"),

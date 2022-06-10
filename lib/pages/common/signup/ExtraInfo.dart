@@ -14,10 +14,10 @@ class ExtraInfo extends StatefulWidget {
 class _ExtraInfoState extends State<ExtraInfo> {
   @override
   Widget build(BuildContext context) {
-    DateTime birthday = Signup.of(context)!.birthday;
-    String country = Signup.of(context)!.country;
-    String gender = Signup.of(context)!.gender;
-    String userType = Signup.of(context)!.userType;
+    DateTime birthday = SignupPage.of(context)!.birthday;
+    String country = SignupPage.of(context)!.country;
+    String gender = SignupPage.of(context)!.gender;
+    String userType = SignupPage.of(context)!.userType;
 
     Widget addRadioButton(String text) {
       return Row(
@@ -30,7 +30,7 @@ class _ExtraInfoState extends State<ExtraInfo> {
               setState(() {
                 if (value != null) {
                   setState(() {
-                    Signup.of(context)!.gender = text;
+                    SignupPage.of(context)!.gender = text;
                   });
                 }
               });
@@ -60,7 +60,7 @@ class _ExtraInfoState extends State<ExtraInfo> {
                     country =
                         "${pickerCountry.flagEmoji} ${pickerCountry.name}";
 
-                    Signup.of(context)?.country = country;
+                    SignupPage.of(context)?.country = country;
                   });
                 });
           }),
@@ -80,7 +80,7 @@ class _ExtraInfoState extends State<ExtraInfo> {
 
             if (newDate != null) {
               setState(() {
-                Signup.of(context)!.birthday = newDate;
+                SignupPage.of(context)!.birthday = newDate;
               });
             }
           }),
