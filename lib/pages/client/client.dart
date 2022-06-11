@@ -24,7 +24,7 @@ class _ClientPageState extends State<ClientPage> {
     screens = [
       ClientDashboard(),
       ClientMonitor(user: widget.user),
-      Revisions(),
+      PatientRevisions(),
       Settings(),
     ];
   }

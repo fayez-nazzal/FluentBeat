@@ -25,7 +25,7 @@ class _DoctorPageState extends State<DoctorPage> {
     screens = [
       DoctorDashboard(),
       DoctorPatients(),
-      Revisions(),
+      PatientRevisions(),
       Settings(),
     ];
   }

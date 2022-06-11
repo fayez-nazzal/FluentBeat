@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:fluent_beat/classes/user.dart';
+import 'package:fluent_beat/pages/client/revisions/no_doctor.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -9,48 +10,88 @@ import '../../../widgets/Button/Button.dart';
 import '../../common/login/login.dart';
 import 'package:http/http.dart' as http;
 
-class Revisions extends StatefulWidget {
-  const Revisions({Key? key}) : super(key: key);
+class PatientRevisions extends StatefulWidget {
+  const PatientRevisions({Key? key}) : super(key: key);
 
   @override
-  State<Revisions> createState() => _RevisionsState();
+  State<PatientRevisions> createState() => PatientRevisionsState();
+
+  static PatientRevisionsState? of(BuildContext context) =>
+      context.findAncestorStateOfType<PatientRevisionsState>();
 }
 
-class _RevisionsState extends State<Revisions> {
+class PatientRevisionsState extends State<PatientRevisions> {
   late List<dynamic> doctors;
   bool hasDoctors = false;
+  Patient? self;
 
-  void listDoctors() async {
+  void getPatientInfo() async {
+    String patientCognitoId = (await Amplify.Auth.getCurrentUser()).userId;
+
     var client = http.Client();
     var response = await client.get(
       Uri.parse(
-          "https://rhp8umja5e.execute-api.us-east-2.amazonaws.com/invoke_sklearn/list_doctors"),
+          "https://rhp8umja5e.execute-api.us-east-2.amazonaws.com/invoke_sklearn/patient_info?patient_cognito_id=$patientCognitoId"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
     );
 
-    // first, decode the full response ( looks like {  statusCode: 200, body: {....}  }  )
+    // first, decode the full response body
+    // for this request, this will be done automatically, as we are using lambda proxy integration
     var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
 
-    // now, decode the body from decodedResponse, this will result into a List of values
-    var body = json.decode(decodedResponse['body']);
+    // last, get the patient from the body, this will result into a Pateint
+    var patient = Patient.fromJson(decodedResponse);
 
-    // last, map the values taken from results to User class, this will result into a list of Users
-    doctors = body.map(User.fromJson).toList();
+    setState(() {
+      self = patient;
+    });
+  }
 
-    print(doctors.length);
+  @override
+  void initState() {
+    super.initState();
 
-    if (doctors.length > 0) hasDoctors = true;
+    getPatientInfo();
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Container(
-            child: Button(
-                bg: 0xffffffff, text: "List Doctors", onPress: listDoctors)),
+        if (self != null && self!.doctor_id == null)
+          PatientRevisionsNoDoctor()
+        else
+          Container(
+            height: 116.0,
+            padding: const EdgeInsets.only(left: 20, right: 20, top: 16),
+            color: Colors.transparent,
+            child: Expanded(
+              child: Container(
+                  decoration: const BoxDecoration(
+                      color: Color(0xFFff6b6b),
+                      borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                  child: Center(
+                      child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      children: [
+                        ClipRRect(
+                            borderRadius: BorderRadius.circular(8.0),
+                            child: Image.asset("images/heart.jpg")),
+                        const Spacer(),
+                        const Text("Your Doctor",
+                            style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white)),
+                        const Spacer()
+                      ],
+                    ),
+                  ))),
+            ),
+          ),
         if (hasDoctors)
           ListView(
             shrinkWrap: true,

@@ -28,9 +28,11 @@ class User {
 
 class Patient extends User {
   final String? request_doctor_id;
+  final String? doctor_id;
 
   const Patient(
       {required this.request_doctor_id,
+      required this.doctor_id,
       required id,
       required name,
       required user_country,
@@ -56,6 +58,7 @@ class Patient extends User {
         gender: json['gender'],
         email: json['email'],
         join_date: json['join_date'],
+        doctor_id: json['doctor_id'],
         request_doctor_id: json['request_doctor_id'],
       );
 }
