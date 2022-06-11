@@ -30,9 +30,9 @@ class User {
 
 class Patient extends User {
   final String? request_doctor_id;
-  final String? doctor_id;
+  String? doctor_id;
 
-  const Patient(
+  Patient(
       {required this.request_doctor_id,
       required this.doctor_id,
       required id,

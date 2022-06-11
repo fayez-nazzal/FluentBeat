@@ -18,7 +18,7 @@ class PatientRevisions extends StatefulWidget {
 
 class PatientRevisionsState extends State<PatientRevisions> {
   late List<dynamic> doctors;
-  bool hasDoctors = false;
+  bool hasDoctor = false;
   Patient? self;
 
   void getPatientInfo() async {
@@ -87,16 +87,6 @@ class PatientRevisionsState extends State<PatientRevisions> {
                     ),
                   ))),
             ),
-          ),
-        if (hasDoctors)
-          ListView(
-            shrinkWrap: true,
-            children: doctors.map((doctor) {
-              return ListTile(
-                title: Text(doctor.name),
-                subtitle: Text(doctor.email),
-              );
-            }).toList(),
           ),
       ],
     );

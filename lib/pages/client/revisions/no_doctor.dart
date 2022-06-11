@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:fluent_beat/classes/user.dart';
+import 'package:fluent_beat/pages/client/revisions/revisions.dart';
 import 'package:flutter/material.dart';
 import '../../../classes/storage_repository.dart';
 import 'package:http/http.dart' as http;
@@ -57,14 +58,14 @@ class _PatientRevisionsNoDoctorState extends State<PatientRevisionsNoDoctor> {
                 color: Colors.green,
                 icon: const Icon(Icons.check),
                 onPressed: () {
-                  // print("delete");
+                  respondToDoctorRequest(doctor.id, true);
                 },
               ),
               IconButton(
                 icon: const Icon(Icons.close),
                 color: Colors.red,
                 onPressed: () {
-                  // print("check");
+                  respondToDoctorRequest(doctor.id, false);
                 },
               ),
             ],
@@ -76,6 +77,61 @@ class _PatientRevisionsNoDoctorState extends State<PatientRevisionsNoDoctor> {
     setState(() {
       doctorsList = doctorsList;
     });
+  }
+
+  void respondToDoctorRequest(String doctorCognitoId, bool accept) async {
+    String patientCognitoId = (await Amplify.Auth.getCurrentUser()).userId;
+
+    var client = http.Client();
+    var response = await client.post(
+      Uri.parse(
+          "https://rhp8umja5e.execute-api.us-east-2.amazonaws.com/invoke_sklearn/patient/respond_to_request?patient_cognito_id=$patientCognitoId"),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, dynamic>{
+        "doctor_cognito_id": doctorCognitoId,
+        "patient_cognito_id": patientCognitoId,
+        "accept": accept,
+      }),
+    );
+
+    // first, decode the full response ( looks like {  statusCode: 200, body: {....}  }  )
+    // for this request, this will be done automatically, as we are using lambda proxy integration
+    var body = jsonDecode(utf8.decode(response.bodyBytes));
+
+    // see if the request was successful
+    if (body['statusCode'] == 200) {
+      // if successful, make the doctor list empty and change doctor id to the new one
+      doctorsList = [];
+
+      PatientRevisions.of(context)!.setState(() {
+        PatientRevisions.of(context)!.self!.doctor_id =
+            accept ? doctorCognitoId : null;
+      });
+    } else {
+      // display an error message
+      AlertDialog alert = AlertDialog(
+        title: const Text("An error occured"),
+        content: const Text("Can't repspond to doctor's request."),
+        actions: [
+          ElevatedButton(
+              onPressed: () {
+                // hide dialog
+                Navigator.of(context).pop();
+              },
+              child: const Text("OK")),
+        ],
+      );
+
+      // show the dialog
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return alert;
+        },
+      );
+    }
   }
 
   @override
