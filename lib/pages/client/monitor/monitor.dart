@@ -186,7 +186,7 @@ class _ClientMonitorState extends State<ClientMonitor> {
 
       appendData = [];
 
-      clientConnection.connection!.input!.listen((Uint8List data) {
+      clientConnection.connection?.input!.listen((Uint8List data) {
         // clientConnection.connection!.output.add(data);
 
         if (clientConnection.shouldDisconnect) {
@@ -310,11 +310,13 @@ class _ClientMonitorState extends State<ClientMonitor> {
                                   ? const Duration(milliseconds: 700)
                                   : heartrate > 70
                                       ? const Duration(milliseconds: 880)
-                                      : const Duration(milliseconds: 1000),
+                                      : heartrate > 0
+                                          ? const Duration(milliseconds: 1000)
+                                          : const Duration(days: 100),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Text("$heartrate BPM"),
+                  child: Text("${heartrate > 0 ? heartrate : "~"} BPM"),
                 )
               ],
             ),
