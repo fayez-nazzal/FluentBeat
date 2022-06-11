@@ -38,7 +38,7 @@ class PatientRevisionsState extends State<PatientRevisions> {
     var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
     // TODO handle errors
     // last, get the patient from the body, this will result into a Pateint
-    var patient = Patient.fromJson(decodedResponse);
+    var patient = await Patient.fromJson(decodedResponse);
 
     setState(() {
       self = patient;
@@ -58,7 +58,7 @@ class PatientRevisionsState extends State<PatientRevisions> {
       children: [
         if (self != null && self!.doctor_id == null)
           PatientRevisionsNoDoctor()
-        else
+        else if (self != null && self!.doctor != null)
           Container(
             height: 116.0,
             padding: const EdgeInsets.only(left: 20, right: 20, top: 16),
@@ -75,14 +75,24 @@ class PatientRevisionsState extends State<PatientRevisions> {
                       children: [
                         ClipRRect(
                             borderRadius: BorderRadius.circular(8.0),
-                            child: Image.asset("images/heart.jpg")),
-                        Spacer(),
-                        const Text("Your Doctor",
-                            style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.white)),
-                        Spacer()
+                            child: self!.doctor!.image),
+                        const Spacer(),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text("Your Doctor:",
+                                style: TextStyle(
+                                    fontSize: 14, color: Colors.white)),
+                            const SizedBox(height: 4),
+                            Text("  ${self!.doctor!.name}",
+                                style: const TextStyle(
+                                    fontSize: 21,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white)),
+                          ],
+                        ),
+                        const Spacer(flex: 2)
                       ],
                     ),
                   ))),

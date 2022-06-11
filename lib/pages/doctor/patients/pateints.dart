@@ -66,7 +66,7 @@ class _DoctorPatientsState extends State<DoctorPatients> {
     var body = json.decode(decodedResponse['body']);
 
     // last, map the values taken from results to User class, this will result into a list of Users
-    patients = body.map(Patient.fromJson).toList();
+    patients = await body.map(Patient.fromJson).toList();
 
     if (patients != null) {
       for (var patient in patients!) {
