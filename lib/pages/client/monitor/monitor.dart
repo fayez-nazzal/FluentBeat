@@ -3,8 +3,10 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
 import 'package:fluent_beat/pages/client/monitor/LiveData.dart';
+import 'package:fluent_beat/pages/client/state/connection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:http/http.dart' as http;
@@ -29,11 +31,6 @@ class _ClientMonitorState extends State<ClientMonitor> {
   ChartSeriesController? _chartSeriesController;
   final int chartLimit = 100;
   late int time;
-  bool exitConnection = false;
-  bool connected = false;
-  bool error = false;
-  final int connectionCountdownMax = 12;
-  int connectionCountdown = 0;
   Timer? timer;
   Timer? bpmTimer;
   Timer? sampleTimer;
@@ -53,6 +50,8 @@ class _ClientMonitorState extends State<ClientMonitor> {
   String winnerClass = "";
   String warning = "";
 
+  static ClientConnectionController get clientConnection => Get.find();
+
   @override
   void initState() {
     super.initState();
@@ -66,6 +65,9 @@ class _ClientMonitorState extends State<ClientMonitor> {
     time = chartData.length;
     bpmTimer = Timer.periodic(const Duration(seconds: 1), _updateBPM);
     sampleTimer = Timer.periodic(const Duration(seconds: 5), _attemptPredict);
+
+    _attemptConnect(null);
+    Timer.periodic(const Duration(seconds: 12), _attemptConnect);
   }
 
   int secs = 0;
@@ -114,6 +116,9 @@ class _ClientMonitorState extends State<ClientMonitor> {
     if (heartrate < 20) return;
     if (callingReq) return;
 
+    // TODO REMOVE THIS LINE
+    return;
+
     callingReq = true;
 
     http.Response response = await http.post(
@@ -160,37 +165,17 @@ class _ClientMonitorState extends State<ClientMonitor> {
     callingReq = false;
   }
 
-  void _updateConnectionCountdown(Timer timer) {
-    setState(() {
-      if (exitConnection || connectionCountdown <= 0 || connected) {
-        connectionCountdown = 0;
-        timer.cancel();
-      }
-
-      if (exitConnection) {
-        connectionCountdown = 0;
-        connected = false;
-        exitConnection = false;
-      } else if (connectionCountdown > 0) {
-        connectionCountdown -= 1;
-      } else {
-        if (!connected) error = true;
-      }
-    });
-  }
-
-  void _connectToECGDevice() async {
-    setState(() {
-      exitConnection = false;
-      connectionCountdown = connectionCountdownMax;
-      connected = false;
-      error = false;
-      Timer.periodic(const Duration(seconds: 1), _updateConnectionCountdown);
-    });
+  void _attemptConnect(Timer? timer) async {
+    // if is connected, return
+    if (clientConnection.connection?.isConnected ?? false) {
+      print("connected, ignoring...");
+      return;
+    }
 
     try {
-      BluetoothConnection connection =
-          await BluetoothConnection.toAddress('00:14:03:05:59:9C');
+      await clientConnection.tryConnection();
+
+      print("To address");
 
       // if we get there, should be connected
       timer =
@@ -198,96 +183,81 @@ class _ClientMonitorState extends State<ClientMonitor> {
 
       appendData = [];
 
-      connection.input?.listen((Uint8List data) {
-        if (exitConnection) {
-          connected = false;
-          connection.finish();
-          exitConnection = false;
-        } else {
-          error = false;
-          connected = true;
-          connectionCountdown = 0;
+      clientConnection.connection!.input!.listen((Uint8List data) {
+        // clientConnection.connection!.output.add(data);
 
-          connection.output.add(data); // Sending data
+        if (clientConnection.shouldDisconnect) {
+          clientConnection.connection!.finish();
+          clientConnection.shouldDisconnect = false;
 
-          String decodedData = ascii.decode(data);
-
-          RegExp digitExp = RegExp(r'(\d)');
-
-          decodedData.split("").forEach((element) async {
-            if (bufferStr.length > 2 &&
-                bufferStr.endsWith("E") &&
-                bufferStr.startsWith("E")) {
-              String data = bufferStr.substring(1, bufferStr.length - 1);
-
-              // if those condition are met, movement may be hapened
-              // so throw the samples..next samples might be better
-              if (data.contains("!") || int.parse(data) == 0) {
-                normBuffer = [];
-                bpmBuffer = [];
-                appendData = [];
-                warning =
-                    "Body movement or incorrect sensor placement is detected, adjust your position for a proper measurement";
-
-                return;
-              } else {
-                warning = "";
-                int x = int.parse(data);
-
-                samplesPassed++;
-
-                // if 1000 samples passed ( 8 seconds, we cn update min max )
-                if (samplesPassed >= 1000) {
-                  if (x > xMax && x < 900)
-                    xMax = x;
-                  else if (x < xMin && x > 0) xMin = x;
-
-                  samplesPassed = 1;
-                }
-
-                double normX = (x - xMin) / (xMax - xMin);
-                time += 1;
-
-                if (appendData.length < 10) {
-                  LiveData liveData = LiveData(time, normX);
-                  appendData.add(liveData);
-                }
-
-                // for bpm measurement
-                bpmBuffer.add(normX);
-
-                // for prediction
-                normBuffer.add(normX);
-
-                bufferStr = "E";
-              }
-            }
-
-            if (element == "E" || digitExp.hasMatch(element)) {
-              bufferStr += element;
-            }
-          });
+          return;
         }
-      }).onDone(() {
-        // print('Disconnected by remote request');
-      });
-    } catch (exception) {
-      connected = false;
-      error = true;
-    }
-  }
 
-  void disconnectDevice() {
-    setState(() {
-      exitConnection = true;
-      error = false;
-      connected = false;
-    });
+        String decodedData = ascii.decode(data);
+
+        RegExp digitExp = RegExp(r'(\d)');
+
+        decodedData.split("").forEach((element) async {
+          if (bufferStr.length > 2 &&
+              bufferStr.endsWith("E") &&
+              bufferStr.startsWith("E")) {
+            String data = bufferStr.substring(1, bufferStr.length - 1);
+
+            // if those condition are met, movement may be hapened
+            // so throw the samples..next samples might be better
+            if (data.contains("!") || int.parse(data) == 0) {
+              normBuffer = [];
+              bpmBuffer = [];
+              appendData = [];
+              warning =
+                  "Body movement or incorrect sensor placement is detected, adjust your position for a proper measurement";
+
+              return;
+            } else {
+              warning = "";
+              int x = int.parse(data);
+
+              samplesPassed++;
+
+              // if 1000 samples passed ( 8 seconds, we cn update min max )
+              if (samplesPassed >= 1000) {
+                if (x > xMax && x < 900)
+                  xMax = x;
+                else if (x < xMin && x > 0) xMin = x;
+
+                samplesPassed = 1;
+              }
+
+              double normX = (x - xMin) / (xMax - xMin);
+              time += 1;
+
+              if (appendData.length < 10) {
+                LiveData liveData = LiveData(time, normX);
+                appendData.add(liveData);
+              }
+
+              // for bpm measurement
+              bpmBuffer.add(normX);
+
+              // for prediction
+              normBuffer.add(normX);
+
+              bufferStr = "E";
+            }
+          }
+
+          if (element == "E" || digitExp.hasMatch(element)) {
+            bufferStr += element;
+          }
+        });
+      });
+    } catch (exception) {}
+
+    setState(() {});
   }
 
   void _updateDataSource(Timer timer) {
     if (appendData.isEmpty) return;
-
     chartData.add(appendData[0]);
     chartData.removeAt(0);
     appendData.removeAt(0);
@@ -311,58 +281,34 @@ class _ClientMonitorState extends State<ClientMonitor> {
       body: Column(
         children: [
           Container(
-            margin: const EdgeInsets.symmetric(vertical: 16),
-            child: Row(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                    onPressed: _connectToECGDevice,
-                    child: const Text("Connect to ECG device")),
-                ElevatedButton(
-                    onPressed: disconnectDevice,
-                    child: const Text("Disconnect"))
-              ],
-            ),
-          ),
-          Container(
-            margin: const EdgeInsets.all(10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  error
-                      ? Icons.error
-                      : connectionCountdown > 0
-                          ? Icons.bluetooth
-                          : !connected
-                              ? Icons.bluetooth_disabled
-                              : Icons.bluetooth_connected,
-                  color: connectionCountdown > 0
-                      ? Colors.blue
-                      : connected
+              margin: const EdgeInsets.all(10),
+              child: GetBuilder<ClientConnectionController>(
+                builder: (_) => Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      !(_.connection?.isConnected ?? false)
+                          ? Icons.bluetooth_disabled
+                          : Icons.bluetooth_connected,
+                      color: _.connection?.isConnected ?? false
                           ? Colors.green
                           : Colors.red,
+                    ),
+                    const Padding(padding: EdgeInsets.only(right: 6)),
+                    Text(
+                      _.connection?.isConnected ?? false
+                          ? "ECG device connected"
+                          : "ECG device not connected",
+                      style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 16,
+                          color: (!(_.connection?.isConnected ?? false))
+                              ? Colors.red
+                              : Colors.blue),
+                    ),
+                  ],
                 ),
-                const Padding(padding: EdgeInsets.only(right: 6)),
-                Text(
-                  error
-                      ? "Can't connect to the ECG device."
-                      : connectionCountdown > 0 && !connected && !exitConnection
-                          ? "Connectoing to the ECG device ($connectionCountdown)..."
-                          : connected
-                              ? "ECG device connected"
-                              : "ECG device not connected",
-                  style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 16,
-                      color: error || (!connected && connectionCountdown == 0)
-                          ? Colors.red
-                          : Colors.blue),
-                ),
-              ],
-            ),
-          ),
+              )),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 52),
             child: SfCartesianChart(

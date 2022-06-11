@@ -32,7 +32,7 @@ class MainApp extends StatelessWidget {
           }),
         ),
       ),
-      home: App(),
+      home: const App(),
       debugShowCheckedModeBanner: false,
     );
   }

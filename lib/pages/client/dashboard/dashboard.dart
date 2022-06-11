@@ -1,4 +1,6 @@
+import 'package:fluent_beat/pages/client/state/connection.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class ClientDashboard extends StatelessWidget {
   const ClientDashboard({Key? key}) : super(key: key);

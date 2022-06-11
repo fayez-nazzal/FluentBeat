@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:fluent_beat/classes/storage.dart';
+import 'package:fluent_beat/pages/client/state/connection.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -23,6 +24,8 @@ class _SettingsState extends State<Settings> {
 
   File? imageFile;
   final ImagePicker imagePicker = ImagePicker();
+
+  static ClientConnectionController get clientConnection => Get.find();
 
   void signOut() async {
     await Amplify.Auth.signOut();
@@ -95,6 +98,10 @@ class _SettingsState extends State<Settings> {
     );
   }
 
+  void refreshBluetoothConnection() async {
+    clientConnection.refreshConnection();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -113,6 +120,10 @@ class _SettingsState extends State<Settings> {
           password: true,
         ),
         Button(bg: 0xffffffff, text: "Sign Out", onPress: signOut),
+        Button(
+            bg: 0xffffffff,
+            text: "Refresh Bluetooth Connection",
+            onPress: refreshBluetoothConnection),
       ],
     );
   }
