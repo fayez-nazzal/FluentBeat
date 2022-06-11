@@ -3,8 +3,8 @@ import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:fluent_beat/pages/common/signup/signup.dart';
 import 'package:flutter/material.dart';
 
-import '../../../widgets/Button/Button.dart';
-import '../../../widgets/Input/Input.dart';
+import '../../../ui/button.dart';
+import '../../../ui/input.dart';
 
 class Verfication extends StatefulWidget {
   const Verfication({Key? key}) : super(key: key);
@@ -16,7 +16,6 @@ class Verfication extends StatefulWidget {
 class _VerficationState extends State<Verfication> {
   @override
   Widget build(BuildContext context) {
-    String message = SignupPage.of(context)!.message;
     String username = SignupPage.of(context)!.username;
 
     void resendVerficationCode() async {
@@ -24,7 +23,7 @@ class _VerficationState extends State<Verfication> {
         await Amplify.Auth.resendSignUpCode(username: username);
       } on AuthException catch (e) {
         setState(() {
-          message = e.message;
+          SignupPage.of(context)!.message = e.message;
         });
       }
     }

@@ -2,7 +2,7 @@ import 'package:country_picker/country_picker.dart';
 import 'package:fluent_beat/pages/common/signup/signup.dart';
 import 'package:flutter/material.dart';
 
-import '../../../widgets/Button/Button.dart';
+import '../../../ui/button.dart';
 
 class ExtraInfo extends StatefulWidget {
   const ExtraInfo({Key? key}) : super(key: key);
@@ -17,7 +17,6 @@ class _ExtraInfoState extends State<ExtraInfo> {
     DateTime birthday = SignupPage.of(context)!.birthday;
     String country = SignupPage.of(context)!.country;
     String gender = SignupPage.of(context)!.gender;
-    String userType = SignupPage.of(context)!.userType;
 
     Widget addRadioButton(String text) {
       return Row(

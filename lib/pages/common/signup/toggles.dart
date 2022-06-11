@@ -1,10 +1,9 @@
 import 'package:fluent_beat/pages/common/signup/signup.dart';
-import 'package:fluent_beat/widgets/Button/Button.dart';
+import 'package:fluent_beat/ui/button.dart';
 import 'package:flutter/material.dart';
 
 class Toggles extends StatefulWidget {
-  List<bool> toggleButtonsSelected;
-  Toggles({Key? key, required this.toggleButtonsSelected}) : super(key: key);
+  const Toggles({Key? key}) : super(key: key);
 
   @override
   State<Toggles> createState() => _TogglesState();

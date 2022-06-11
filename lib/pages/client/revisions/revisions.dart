@@ -4,10 +4,6 @@ import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:fluent_beat/classes/user.dart';
 import 'package:fluent_beat/pages/client/revisions/no_doctor.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-
-import '../../../widgets/Button/Button.dart';
-import '../../common/login/login.dart';
 import 'package:http/http.dart' as http;
 
 class PatientRevisions extends StatefulWidget {
@@ -40,7 +36,7 @@ class PatientRevisionsState extends State<PatientRevisions> {
     // first, decode the full response body
     // for this request, this will be done automatically, as we are using lambda proxy integration
     var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-
+    // TODO handle errors
     // last, get the patient from the body, this will result into a Pateint
     var patient = Patient.fromJson(decodedResponse);
 
@@ -80,13 +76,13 @@ class PatientRevisionsState extends State<PatientRevisions> {
                         ClipRRect(
                             borderRadius: BorderRadius.circular(8.0),
                             child: Image.asset("images/heart.jpg")),
-                        const Spacer(),
+                        Spacer(),
                         const Text("Your Doctor",
                             style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w500,
                                 color: Colors.white)),
-                        const Spacer()
+                        Spacer()
                       ],
                     ),
                   ))),

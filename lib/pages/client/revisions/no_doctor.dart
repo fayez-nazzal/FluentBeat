@@ -3,17 +3,12 @@ import 'dart:io';
 
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:fluent_beat/classes/user.dart';
-import 'package:fluent_beat/pages/client/revisions/revisions.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-
-import '../../../classes/storage.dart';
-import '../../../widgets/Button/Button.dart';
-import '../../common/login/login.dart';
+import '../../../classes/storage_repository.dart';
 import 'package:http/http.dart' as http;
 
 class PatientRevisionsNoDoctor extends StatefulWidget {
-  PatientRevisionsNoDoctor({Key? key}) : super(key: key);
+  const PatientRevisionsNoDoctor({Key? key}) : super(key: key);
 
   @override
   State<PatientRevisionsNoDoctor> createState() =>
@@ -39,8 +34,6 @@ class _PatientRevisionsNoDoctorState extends State<PatientRevisionsNoDoctor> {
     // for this request, this will be done automatically, as we are using lambda proxy integration
     var body = jsonDecode(utf8.decode(response.bodyBytes));
 
-    print(body);
-
     // last, map the values taken from results to User class, this will result into a list of Users
     var doctors = body.map(User.fromJson).toList();
 
@@ -64,14 +57,14 @@ class _PatientRevisionsNoDoctorState extends State<PatientRevisionsNoDoctor> {
                 color: Colors.green,
                 icon: const Icon(Icons.check),
                 onPressed: () {
-                  print("delete");
+                  // print("delete");
                 },
               ),
               IconButton(
                 icon: const Icon(Icons.close),
                 color: Colors.red,
                 onPressed: () {
-                  print("check");
+                  // print("check");
                 },
               ),
             ],

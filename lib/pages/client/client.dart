@@ -9,7 +9,7 @@ import 'dashboard/dashboard.dart';
 class ClientPage extends StatefulWidget {
   final AuthUser user;
 
-  ClientPage({Key? key, required this.user}) : super(key: key);
+  const ClientPage({Key? key, required this.user}) : super(key: key);
 
   @override
   State<ClientPage> createState() => _ClientPageState();
@@ -21,11 +21,13 @@ class _ClientPageState extends State<ClientPage> {
 
   @override
   void initState() {
+    super.initState();
+
     screens = [
-      ClientDashboard(),
+      const ClientDashboard(),
       ClientMonitor(user: widget.user),
-      PatientRevisions(),
-      Settings(),
+      const PatientRevisions(),
+      const Settings(),
     ];
   }
 
@@ -41,7 +43,7 @@ class _ClientPageState extends State<ClientPage> {
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         iconSize: 28,
-        unselectedItemColor: Color(0xff86AEAD),
+        unselectedItemColor: const Color(0xff86AEAD),
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.dashboard),

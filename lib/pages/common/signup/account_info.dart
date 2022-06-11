@@ -1,9 +1,6 @@
-import 'package:country_picker/country_picker.dart';
 import 'package:fluent_beat/pages/common/signup/signup.dart';
 import 'package:flutter/material.dart';
-
-import '../../../widgets/Button/Button.dart';
-import '../../../widgets/Input/Input.dart';
+import '../../../ui/input.dart';
 
 class AccountInfo extends StatefulWidget {
   const AccountInfo({Key? key}) : super(key: key);

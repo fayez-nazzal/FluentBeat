@@ -5,14 +5,19 @@ import 'package:fluent_beat/pages/doctor/doctor.dart';
 import 'package:get/get.dart';
 
 void redirectUserToRelevantPage(AuthUser user) async {
-  var userAttributes = await Amplify.Auth.fetchUserAttributes();
-  userAttributes.forEach((element) {
-    if (element.userAttributeKey.toString() == "custom:usertype") {
-      if (element.value == "USER") {
-        Get.to(ClientPage(user: user));
-      } else if (element.value == "DOCTOR") {
-        Get.to(DoctorPage(user: user));
+  try {
+    var userAttributes = await Amplify.Auth.fetchUserAttributes();
+
+    for (var element in userAttributes) {
+      if (element.userAttributeKey.toString() == "custom:usertype") {
+        if (element.value == "USER") {
+          Get.to(ClientPage(user: user));
+        } else if (element.value == "DOCTOR") {
+          Get.to(DoctorPage(user: user));
+        }
       }
     }
-  });
+  } on Exception {
+    // nothing to do...
+  }
 }

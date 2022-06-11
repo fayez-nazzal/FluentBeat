@@ -30,13 +30,13 @@ class DoctorDashboard extends StatelessWidget {
                             ClipRRect(
                                 borderRadius: BorderRadius.circular(8.0),
                                 child: Image.asset("images/heart.jpg")),
-                            const Spacer(),
+                            Spacer(),
                             const Text("Fayez Nazzal",
                                 style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w500,
                                     color: Colors.white)),
-                            const Spacer()
+                            Spacer()
                           ],
                         ),
                       ))),

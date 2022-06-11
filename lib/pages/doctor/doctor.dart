@@ -1,5 +1,4 @@
 import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
-import 'package:fluent_beat/pages/client/monitor/monitor.dart';
 import 'package:fluent_beat/pages/client/revisions/revisions.dart';
 import 'package:fluent_beat/pages/client/settings/settings.dart';
 import 'package:fluent_beat/pages/doctor/patients/pateints.dart';
@@ -10,7 +9,7 @@ import 'dashboard/dashboard.dart';
 class DoctorPage extends StatefulWidget {
   final AuthUser user;
 
-  DoctorPage({Key? key, required this.user}) : super(key: key);
+  const DoctorPage({Key? key, required this.user}) : super(key: key);
 
   @override
   State<DoctorPage> createState() => _DoctorPageState();
@@ -22,11 +21,13 @@ class _DoctorPageState extends State<DoctorPage> {
 
   @override
   void initState() {
+    super.initState();
+
     screens = [
-      DoctorDashboard(),
-      DoctorPatients(),
-      PatientRevisions(),
-      Settings(),
+      const DoctorDashboard(),
+      const DoctorPatients(),
+      const PatientRevisions(),
+      const Settings(),
     ];
   }
 

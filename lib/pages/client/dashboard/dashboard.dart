@@ -1,6 +1,4 @@
-import 'package:fluent_beat/pages/client/state/connection.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class ClientDashboard extends StatelessWidget {
   const ClientDashboard({Key? key}) : super(key: key);
@@ -32,13 +30,13 @@ class ClientDashboard extends StatelessWidget {
                             ClipRRect(
                                 borderRadius: BorderRadius.circular(8.0),
                                 child: Image.asset("images/heart.jpg")),
-                            const Spacer(),
+                            Spacer(),
                             const Text("Fayez Nazzal",
                                 style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w500,
                                     color: Colors.white)),
-                            const Spacer()
+                            Spacer()
                           ],
                         ),
                       ))),

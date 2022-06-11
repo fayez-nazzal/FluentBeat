@@ -2,17 +2,16 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
-import 'package:fluent_beat/pages/client/monitor/LiveData.dart';
+import 'package:fluent_beat/classes/live_data.dart';
 import 'package:fluent_beat/pages/client/state/connection.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
-import '../../../widgets/Button/Button.dart';
+import '../../../ui/button.dart';
 
 class ClientMonitor extends StatefulWidget {
   final AuthUser user;
@@ -104,7 +103,7 @@ class _ClientMonitorState extends State<ClientMonitor> {
         }
       }
 
-      print(bpm * 10);
+      // print(bpm * 10);
 
       bpmBuffer = [];
 
@@ -261,7 +260,9 @@ class _ClientMonitorState extends State<ClientMonitor> {
           }
         });
       });
-    } catch (exception) {}
+    } catch (exception) {
+      // TODO handle this sonehow
+    }
 
     setState(() {});
   }

@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:fluent_beat/pages/client/client.dart';
-import 'package:fluent_beat/pages/common/signup/AccountInfo.dart';
-import 'package:fluent_beat/pages/common/signup/ExtraInfo.dart';
+import 'package:fluent_beat/pages/common/signup/account_info.dart';
+import 'package:fluent_beat/pages/common/signup/extra_info.dart';
 import 'package:fluent_beat/pages/common/signup/toggles.dart';
 import 'package:fluent_beat/pages/common/signup/verfication.dart';
 import 'package:fluent_beat/utils.dart';
@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
-import '../../../widgets/Button/Button.dart';
+import '../../../ui/button.dart';
 
 class SignupPage extends StatefulWidget {
   String username = "";
@@ -69,11 +69,9 @@ class SignupPageState extends State<SignupPage> {
             content: Scrollbar(
               child: ListView(
                   shrinkWrap: true,
-                  physics: ScrollPhysics(),
-                  children: [
-                    Toggles(
-                      toggleButtonsSelected: toggleButtonsSelected,
-                    ),
+                  physics: const ScrollPhysics(),
+                  children: const [
+                    Toggles(),
                     AccountInfo(),
                   ]),
             )),
@@ -83,14 +81,14 @@ class SignupPageState extends State<SignupPage> {
             content: Scrollbar(
               child: ListView(
                   shrinkWrap: true,
-                  physics: ScrollPhysics(),
-                  children: [ExtraInfo()]),
+                  physics: const ScrollPhysics(),
+                  children: const [ExtraInfo()]),
             )),
         Step(
             isActive: currentIndex == 2,
             title: const Text("Verify"),
-            content:
-                Expanded(child: SingleChildScrollView(child: Verfication())))
+            content: const Expanded(
+                child: SingleChildScrollView(child: Verfication())))
       ];
 
   void signUp() async {
@@ -178,12 +176,9 @@ class SignupPageState extends State<SignupPage> {
         var decodedResponse =
             jsonDecode(utf8.decode(response.bodyBytes)) as Map;
 
-        print(decodedResponse);
-
-        if (response.statusCode == 200)
-          setState(() {
-            Get.to(ClientPage(user: user));
-          });
+        if (response.statusCode == 200) {
+          Get.to(ClientPage(user: user));
+        }
       }).onError((error, stackTrace) {
         setState(() {
           message = error.toString();

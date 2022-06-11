@@ -1,14 +1,16 @@
+// ignore_for_file: non_constant_identifier_names
+
 import 'dart:io';
 
 import 'package:amplify_flutter/amplify_flutter.dart';
-import 'package:fluent_beat/classes/storage.dart';
+import 'package:fluent_beat/classes/storage_repository.dart';
 import 'package:fluent_beat/pages/client/state/connection.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../../widgets/Button/Button.dart';
-import '../../../widgets/Input/Input.dart';
+import '../../../ui/button.dart';
+import '../../../ui/input.dart';
 import '../../common/login/login.dart';
 
 class Settings extends StatefulWidget {
@@ -30,7 +32,7 @@ class _SettingsState extends State<Settings> {
   void signOut() async {
     await Amplify.Auth.signOut();
 
-    Get.to(LoginPage());
+    Get.to(const LoginPage());
   }
 
   void checkProfileImage() async {
@@ -57,7 +59,7 @@ class _SettingsState extends State<Settings> {
         ClipRRect(
           borderRadius: BorderRadius.circular(32), // Image border
           child: SizedBox.fromSize(
-            size: Size.fromRadius(80), // Image radius
+            size: const Size.fromRadius(80), // Image radius
             child: imageFile == null
                 ? Image.asset('images/heart.jpg', fit: BoxFit.cover)
                 : Image.file(imageFile!, fit: BoxFit.cover),
