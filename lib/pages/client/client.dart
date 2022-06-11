@@ -41,6 +41,7 @@ class _ClientPageState extends State<ClientPage> {
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         iconSize: 28,
+        unselectedItemColor: Color(0xff86AEAD),
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.dashboard),

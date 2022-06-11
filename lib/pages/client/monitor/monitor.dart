@@ -12,6 +12,8 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
+import '../../../widgets/Button/Button.dart';
+
 class ClientMonitor extends StatefulWidget {
   final AuthUser user;
 
@@ -50,6 +52,9 @@ class _ClientMonitorState extends State<ClientMonitor> {
   String winnerClass = "";
   String warning = "";
 
+  bool isRecording = false;
+  int recordingCountdown = 0;
+
   static ClientConnectionController get clientConnection => Get.find();
 
   @override
@@ -73,8 +78,6 @@ class _ClientMonitorState extends State<ClientMonitor> {
   int secs = 0;
 
   void _updateBPM(Timer timer) {
-    if (bpmBuffer.isNotEmpty) print('seconds ${secs++}');
-
     int bpm = 0;
     double bpmBufferMax = -1;
 
@@ -209,12 +212,19 @@ class _ClientMonitorState extends State<ClientMonitor> {
               normBuffer = [];
               bpmBuffer = [];
               appendData = [];
-              warning =
-                  "Body movement or incorrect sensor placement is detected, adjust your position for a proper measurement";
+              bufferStr = "E";
+              print("received bad sample");
+
+              setState(() {
+                warning =
+                    "Body movement or incorrect sensor placement is detected, adjust your position for a proper measurement";
+              });
 
               return;
             } else {
-              warning = "";
+              setState(() {
+                warning = "";
+              });
               int x = int.parse(data);
 
               samplesPassed++;
@@ -280,85 +290,98 @@ class _ClientMonitorState extends State<ClientMonitor> {
       ),
       body: Column(
         children: [
-          Container(
-              margin: const EdgeInsets.all(10),
-              child: GetBuilder<ClientConnectionController>(
-                builder: (_) => Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      !(_.connection?.isConnected ?? false)
-                          ? Icons.bluetooth_disabled
-                          : Icons.bluetooth_connected,
-                      color: _.connection?.isConnected ?? false
-                          ? Colors.green
-                          : Colors.red,
-                    ),
-                    const Padding(padding: EdgeInsets.only(right: 6)),
-                    Text(
-                      _.connection?.isConnected ?? false
-                          ? "ECG device connected"
-                          : "ECG device not connected",
-                      style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          fontSize: 16,
-                          color: (!(_.connection?.isConnected ?? false))
-                              ? Colors.red
-                              : Colors.blue),
-                    ),
-                  ],
-                ),
-              )),
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 52),
-            child: SfCartesianChart(
-              series: [
-                FastLineSeries<LiveData, int>(
-                    onRendererCreated: (ChartSeriesController controller) {
-                      // Assigning the controller to the _chartSeriesController.
-                      _chartSeriesController = controller;
-                    },
-                    // Binding the chartData to the dataSource of the line series.
-                    dataSource: chartData,
-                    xValueMapper: (LiveData liveData, _) => liveData.x,
-                    yValueMapper: (LiveData liveData, _) => liveData.y,
-                    animationDuration: 8),
+            padding: const EdgeInsets.only(
+              top: 24.0,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SpinKitPumpingHeart(
+                  color: const Color(0xffF9595F),
+                  size: 24,
+                  duration: heartrate > 120
+                      ? const Duration(milliseconds: 300)
+                      : heartrate > 100
+                          ? const Duration(milliseconds: 500)
+                          : heartrate > 90
+                              ? const Duration(milliseconds: 600)
+                              : heartrate > 80
+                                  ? const Duration(milliseconds: 700)
+                                  : heartrate > 70
+                                      ? const Duration(milliseconds: 880)
+                                      : const Duration(milliseconds: 1000),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text("$heartrate BPM"),
+                )
               ],
-              enableAxisAnimation: true,
-              primaryYAxis: NumericAxis(
-                minimum: 0.000,
-                maximum: 1.000,
-              ),
-              primaryXAxis: NumericAxis(isVisible: false),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Column(
+              children: [
+                const Text("ECG Signal",
+                    style:
+                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                SfCartesianChart(
+                  plotAreaBackgroundColor: isRecording
+                      ? const Color(0x33CAD7D7)
+                      : const Color(0xaafafafa),
+                  series: [
+                    FastLineSeries<LiveData, int>(
+                        color: const Color(0xff52A1BC),
+                        onRendererCreated: (ChartSeriesController controller) {
+                          // Assigning the controller to the _chartSeriesController.
+                          _chartSeriesController = controller;
+                        },
+                        // Binding the chartData to the dataSource of the line series.
+                        dataSource: chartData,
+                        xValueMapper: (LiveData liveData, _) => liveData.x,
+                        yValueMapper: (LiveData liveData, _) => liveData.y,
+                        animationDuration: 8),
+                  ],
+                  enableAxisAnimation: true,
+                  primaryYAxis: NumericAxis(
+                    minimum: 0.000,
+                    maximum: 1.000,
+                  ),
+                  primaryXAxis: NumericAxis(isVisible: false),
+                ),
+              ],
             ),
           ),
           if (predictions[winnerClass] != null)
             Text("winner is $winnerClass for ${predictions[winnerClass]!}"),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SpinKitPumpingHeart(
-                color: const Color(0xffF9595F),
-                size: 24,
-                duration: heartrate > 120
-                    ? const Duration(milliseconds: 300)
-                    : heartrate > 100
-                        ? const Duration(milliseconds: 500)
-                        : heartrate > 90
-                            ? const Duration(milliseconds: 600)
-                            : heartrate > 80
-                                ? const Duration(milliseconds: 700)
-                                : heartrate > 70
-                                    ? const Duration(milliseconds: 880)
-                                    : const Duration(milliseconds: 1000),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text("$heartrate BPM"),
-              )
-            ],
-          ),
-          Text(warning)
+          Text(warning),
+          Button(
+              bg: 0xFFff6b6b,
+              text: isRecording
+                  ? "Recording $recordingCountdown/60 (Stop)"
+                  : "Record for Revision",
+              onPress: () {
+                setState(() {
+                  isRecording = !isRecording;
+
+                  if (isRecording) {
+                    recordingCountdown = 60;
+
+                    Timer.periodic(const Duration(seconds: 1), (timer) {
+                      setState(() {
+                        recordingCountdown -= 1;
+
+                        if (recordingCountdown <= 0 || !isRecording) {
+                          timer.cancel();
+                          isRecording = false;
+                          recordingCountdown = 0;
+                        }
+                      });
+                    });
+                  }
+                });
+              }),
         ],
       ),
     );

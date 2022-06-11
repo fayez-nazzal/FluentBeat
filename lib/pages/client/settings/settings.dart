@@ -120,6 +120,35 @@ class _SettingsState extends State<Settings> {
           password: true,
         ),
         Button(bg: 0xffffffff, text: "Sign Out", onPress: signOut),
+        Container(
+            margin: const EdgeInsets.all(10),
+            child: GetBuilder<ClientConnectionController>(
+              builder: (_) => Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    !(_.connection?.isConnected ?? false)
+                        ? Icons.bluetooth_disabled
+                        : Icons.bluetooth_connected,
+                    color: _.connection?.isConnected ?? false
+                        ? Colors.green
+                        : Colors.red,
+                  ),
+                  const Padding(padding: EdgeInsets.only(right: 6)),
+                  Text(
+                    _.connection?.isConnected ?? false
+                        ? "ECG device connected"
+                        : "ECG device not connected",
+                    style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 16,
+                        color: (!(_.connection?.isConnected ?? false))
+                            ? Colors.red
+                            : Colors.blue),
+                  ),
+                ],
+              ),
+            )),
         Button(
             bg: 0xffffffff,
             text: "Refresh Bluetooth Connection",
