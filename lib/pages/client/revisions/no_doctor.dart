@@ -5,6 +5,7 @@ import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:fluent_beat/classes/user.dart';
 import 'package:fluent_beat/pages/client/revisions/revisions.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../../../classes/storage_repository.dart';
 import 'package:http/http.dart' as http;
 
@@ -25,7 +26,7 @@ class _PatientRevisionsNoDoctorState extends State<PatientRevisionsNoDoctor> {
     var client = http.Client();
     var response = await client.get(
       Uri.parse(
-          "https://rhp8umja5e.execute-api.us-east-2.amazonaws.com/invoke_sklearn/list_doctors?patient_cognito_id=$patientCognitoId"),
+          "${dotenv.env["API_URL"]}/list_doctors?patient_cognito_id=$patientCognitoId"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -85,7 +86,7 @@ class _PatientRevisionsNoDoctorState extends State<PatientRevisionsNoDoctor> {
     var client = http.Client();
     var response = await client.post(
       Uri.parse(
-          "https://rhp8umja5e.execute-api.us-east-2.amazonaws.com/invoke_sklearn/patient/respond_to_request?patient_cognito_id=$patientCognitoId"),
+          "${dotenv.env["API_URL"]}/patient/respond_to_request?patient_cognito_id=$patientCognitoId"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },

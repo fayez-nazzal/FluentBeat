@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:fluent_beat/classes/storage_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
 import '../../../classes/user.dart';
@@ -23,9 +24,9 @@ class _DoctorPatientsState extends State<DoctorPatients> {
   void requestPatient(String patientId) async {
     String doctorId = (await Amplify.Auth.getCurrentUser()).userId;
 
+    var dotenv;
     http.Response response = await http.post(
-        Uri.parse(
-            'https://rhp8umja5e.execute-api.us-east-2.amazonaws.com/invoke_sklearn/request_patient'),
+        Uri.parse("${dotenv.env["API_URL"]}/request_patient"),
         headers: {
           HttpHeaders.contentTypeHeader: 'application/json',
         },
@@ -52,8 +53,7 @@ class _DoctorPatientsState extends State<DoctorPatients> {
 
     var client = http.Client();
     var response = await client.get(
-      Uri.parse(
-          "https://rhp8umja5e.execute-api.us-east-2.amazonaws.com/invoke_sklearn/list_patients"),
+      Uri.parse("${dotenv.env["API_URL"]}/list_patients"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },

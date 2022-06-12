@@ -125,7 +125,7 @@ class _ClientMonitorState extends State<ClientMonitor> {
 
     http.Response response = await http.post(
       Uri.parse(
-          "https://rhp8umja5e.execute-api.us-east-2.amazonaws.com/invoke_sklearn/invoke_sklearn"),
+          "${dotenv.env["API_URL"]/invoke_sklearn"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },

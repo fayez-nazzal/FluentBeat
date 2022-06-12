@@ -9,6 +9,7 @@ import 'package:fluent_beat/pages/common/signup/toggles.dart';
 import 'package:fluent_beat/pages/common/signup/verfication.dart';
 import 'package:fluent_beat/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
@@ -156,22 +157,21 @@ class SignupPageState extends State<SignupPage> {
         var user = await Amplify.Auth.getCurrentUser();
 
         var client = http.Client();
-        var response = await client.post(
-            Uri.parse(
-                "https://rhp8umja5e.execute-api.us-east-2.amazonaws.com/invoke_sklearn/new_user"),
-            headers: <String, String>{
-              'Content-Type': 'application/json; charset=UTF-8',
-            },
-            body: jsonEncode(<String, String>{
-              'cognito_id': user.userId,
-              'user_type': userType,
-              'name': name,
-              'email_address': username,
-              // birth-date in format YYYY-MM-DD
-              'birthday': birthday.toString().substring(0, 10),
-              'user_country': country,
-              'gender': gender
-            }));
+        var response =
+            await client.post(Uri.parse("${dotenv.env["API_URL"]}/new_user"),
+                headers: <String, String>{
+                  'Content-Type': 'application/json; charset=UTF-8',
+                },
+                body: jsonEncode(<String, String>{
+                  'cognito_id': user.userId,
+                  'user_type': userType,
+                  'name': name,
+                  'email_address': username,
+                  // birth-date in format YYYY-MM-DD
+                  'birthday': birthday.toString().substring(0, 10),
+                  'user_country': country,
+                  'gender': gender
+                }));
 
         var decodedResponse =
             jsonDecode(utf8.decode(response.bodyBytes)) as Map;

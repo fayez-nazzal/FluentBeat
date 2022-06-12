@@ -1,10 +1,13 @@
 import 'package:fluent_beat/app.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
+
+  await dotenv.load(fileName: ".env");
 
   runApp(const MainApp());
 }
