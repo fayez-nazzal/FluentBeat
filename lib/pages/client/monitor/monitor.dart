@@ -4,6 +4,8 @@ import 'dart:typed_data';
 import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
 import 'package:fluent_beat/classes/live_data.dart';
 import 'package:fluent_beat/pages/client/state/connection.dart';
+import 'package:fluent_beat/pages/client/state/patient.dart';
+import 'package:fluent_beat/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
@@ -26,6 +28,7 @@ class ClientMonitor extends StatefulWidget {
 class _ClientMonitorState extends State<ClientMonitor> {
   List<double> normBuffer = <double>[];
   List<double> bpmBuffer = <double>[];
+  List<double> revisionBuffer = <double>[];
   int heartrate = 0;
   String bufferStr = "";
   List<LiveData> chartData = <LiveData>[];
@@ -56,6 +59,7 @@ class _ClientMonitorState extends State<ClientMonitor> {
   int recordingCountdown = 0;
 
   static ClientConnectionController get clientConnection => Get.find();
+  static PatientStateController get patientState => Get.find();
 
   @override
   void initState() {
@@ -104,7 +108,7 @@ class _ClientMonitorState extends State<ClientMonitor> {
         }
       }
 
-      // print(bpm * 10);
+      //
 
       bpmBuffer = [];
 
@@ -145,10 +149,7 @@ class _ClientMonitorState extends State<ClientMonitor> {
       } else {
         predictions[response.body] = 1;
       }
-    } else {
-      print("ERROR, status");
-      print(response.statusCode);
-    }
+    } else {}
 
     int maxValue = -1;
     String maxKey = "";
@@ -170,18 +171,15 @@ class _ClientMonitorState extends State<ClientMonitor> {
   void _attemptConnect(Timer? timer) async {
     // if is connected, return
     if (clientConnection.connection?.isConnected ?? false) {
-      print("connected, ignoring...");
       return;
     }
 
     try {
       await clientConnection.tryConnection();
 
-      print("To address");
-
       // if we get there, should be connected
       timer =
-          Timer.periodic(const Duration(milliseconds: 9), _updateDataSource);
+          Timer.periodic(const Duration(milliseconds: 10), _updateDataSource);
 
       appendData = [];
 
@@ -199,66 +197,58 @@ class _ClientMonitorState extends State<ClientMonitor> {
 
         RegExp digitExp = RegExp(r'(\d)');
 
-        decodedData.split("").forEach((element) async {
+        var splittedDecodedData = decodedData.split("");
+
+        for (var element in splittedDecodedData) {
           if (bufferStr.length > 2 &&
               bufferStr.endsWith("E") &&
               bufferStr.startsWith("E")) {
             String data = bufferStr.substring(1, bufferStr.length - 1);
 
-            // if those condition are met, movement may be hapened
-            // so throw the samples..next samples might be better
-            if (data.contains("!") || int.parse(data) == 0) {
-              normBuffer = [];
-              bpmBuffer = [];
-              appendData = [];
-              bufferStr = "E";
-              print("received bad sample");
+            int x = int.parse(data);
 
-              setState(() {
-                warning =
-                    "Body movement or incorrect sensor placement is detected, adjust your position for a proper measurement";
-              });
+            samplesPassed++;
 
-              return;
-            } else {
-              setState(() {
-                warning = "";
-              });
-              int x = int.parse(data);
+            // if 300 samples passed
+            if (samplesPassed >= 300) {
+              if (x > xMax) xMax = x;
 
-              samplesPassed++;
+              if (x < xMin) xMin = x;
 
-              // if 1000 samples passed ( 8 seconds, we cn update min max )
-              if (samplesPassed >= 1000) {
-                if (x > xMax && x < 900)
-                  xMax = x;
-                else if (x < xMin && x > 0) xMin = x;
-
-                samplesPassed = 1;
-              }
-
-              double normX = (x - xMin) / (xMax - xMin);
-              time += 1;
-
-              if (appendData.length < 10) {
-                LiveData liveData = LiveData(time, normX);
-                appendData.add(liveData);
-              }
-
-              // for bpm measurement
-              bpmBuffer.add(normX);
-
-              // for prediction
-              normBuffer.add(normX);
-
-              bufferStr = "E";
+              samplesPassed = 1;
             }
+
+            double normX = (x - xMin) / (xMax - xMin);
+            time += 1;
+
+            if (appendData.length < 10) {
+              LiveData liveData = LiveData(time, normX);
+              appendData.add(liveData);
+            }
+
+            // for bpm measurement
+            bpmBuffer.add(normX);
+
+            // for prediction
+            normBuffer.add(normX);
+
+            if (isRecording) {
+              revisionBuffer.add(normX);
+            }
+
+            bufferStr = "E";
           }
 
-          if (element == "E" || digitExp.hasMatch(element)) {
+          if (element != "!" &&
+              (element == "E" || digitExp.hasMatch(element))) {
             bufferStr += element;
           }
-        });
+
+          // in case wrong thing happens to bufferStr
+          if (bufferStr.contains("EE")) {
+            bufferStr = "";
+          }
+        }
       });
     } catch (exception) {
       // TODO handle this sonehow
@@ -267,8 +257,40 @@ class _ClientMonitorState extends State<ClientMonitor> {
     setState(() {});
   }
 
+  void createRevision() async {
+    if (!isRecording || revisionBuffer.isEmpty) return;
+
+    List<double> ecgData = [...revisionBuffer];
+    revisionBuffer = [];
+
+    var client = http.Client();
+
+    var response = await client.post(
+      Uri.parse("${dotenv.env["API_URL"]}/revisions/create"),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, dynamic>{
+        'user_id': widget.user.userId,
+        'data': ecgData,
+        'bpm': heartrate,
+        "user_display_name": patientState.patient!.name
+      }),
+    );
+
+    // check response status
+    if (response.statusCode == 200) {
+      // print response body
+      print(response.body);
+    } else {
+      print(response.body);
+      showErrorDialog("Revision cannot be created", context);
+    }
+  }
+
   void _updateDataSource(Timer timer) {
     if (appendData.isEmpty) return;
+
     chartData.add(appendData[0]);
     chartData.removeAt(0);
     appendData.removeAt(0);
@@ -291,6 +313,7 @@ class _ClientMonitorState extends State<ClientMonitor> {
       ),
       body: Column(
         children: [
+          GetBuilder<PatientStateController>(builder: (_) => Container()),
           Padding(
             padding: const EdgeInsets.only(
               top: 24.0,
@@ -359,12 +382,15 @@ class _ClientMonitorState extends State<ClientMonitor> {
           if (predictions[winnerClass] != null)
             Text("winner is $winnerClass for ${predictions[winnerClass]!}"),
           Text(warning),
+          Text(revisionBuffer.length.toString()),
           Button(
               bg: 0xFFff6b6b,
               text: isRecording
                   ? "Recording $recordingCountdown/60 (Stop)"
                   : "Record for Revision",
               onPress: () {
+                if (isRecording) createRevision();
+
                 setState(() {
                   isRecording = !isRecording;
 

@@ -2,6 +2,7 @@ import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:amplify_storage_s3/amplify_storage_s3.dart';
 import 'package:fluent_beat/pages/client/state/connection.dart';
+import 'package:fluent_beat/pages/client/state/patient.dart';
 import 'package:fluent_beat/pages/common/login/login.dart';
 import 'package:fluent_beat/utils.dart';
 import 'package:flutter/material.dart';
@@ -62,6 +63,9 @@ class _AppState extends State<App> {
         children: [
           GetBuilder<ClientConnectionController>(
               init: ClientConnectionController(), // INIT IT ONLY THE FIRST TIME
+              builder: (_) => Container()),
+          GetBuilder<PatientStateController>(
+              init: PatientStateController(), // INIT IT ONLY THE FIRST TIME
               builder: (_) => Container()),
           amplifyConfigured ? const LoginPage() : Container(),
         ],

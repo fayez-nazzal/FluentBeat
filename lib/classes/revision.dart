@@ -1,4 +1,6 @@
 // ignore_for_file: non_constant_identifier_names
+import 'package:timeago/timeago.dart' as timeago;
+
 class Revision {
   final String cognito_id;
   final String date;
@@ -14,6 +16,19 @@ class Revision {
 
   String getId() {
     return "$cognito_id$date";
+  }
+
+  // get short id
+  String getShortId() {
+    String shortCognitoId = cognito_id.substring(0, 2) +
+        cognito_id.substring(cognito_id.length - 3);
+    String dateWithoutSeparators = date.replaceAll("-", "");
+
+    return "$shortCognitoId$dateWithoutSeparators";
+  }
+
+  String getDaysAgo() {
+    return timeago.format(DateTime.parse(date));
   }
 
   static Future<Revision> fromJson(json) async {

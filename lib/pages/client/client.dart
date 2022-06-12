@@ -2,7 +2,9 @@ import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
 import 'package:fluent_beat/pages/client/monitor/monitor.dart';
 import 'package:fluent_beat/pages/client/revisions/revisions.dart';
 import 'package:fluent_beat/pages/client/settings/settings.dart';
+import 'package:fluent_beat/pages/client/state/patient.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import 'dashboard/dashboard.dart';
 
@@ -19,9 +21,13 @@ class _ClientPageState extends State<ClientPage> {
   int currentIndex = 0;
   late dynamic screens;
 
+  static PatientStateController get patientState => Get.find();
+
   @override
   void initState() {
     super.initState();
+
+    patientState.getInfo();
 
     screens = [
       const ClientDashboard(),

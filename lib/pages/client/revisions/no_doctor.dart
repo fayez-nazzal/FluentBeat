@@ -4,9 +4,11 @@ import 'dart:io';
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:fluent_beat/classes/user.dart';
 import 'package:fluent_beat/pages/client/revisions/revisions.dart';
+import 'package:fluent_beat/pages/client/state/patient.dart';
 import 'package:fluent_beat/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:get/get.dart';
 import '../../../classes/storage_repository.dart';
 import 'package:http/http.dart' as http;
 
@@ -20,6 +22,7 @@ class PatientRevisionsNoDoctor extends StatefulWidget {
 
 class _PatientRevisionsNoDoctorState extends State<PatientRevisionsNoDoctor> {
   List<ListTile> doctorsList = [];
+  static PatientStateController get patientState => Get.find();
 
   void listDoctors() async {
     String patientCognitoId = (await Amplify.Auth.getCurrentUser()).userId;
@@ -112,10 +115,8 @@ class _PatientRevisionsNoDoctorState extends State<PatientRevisionsNoDoctor> {
       // if successful, make the doctor list empty and change doctor id to the new one
       doctorsList = [];
 
-      PatientRevisions.of(context)!.setState(() {
-        PatientRevisions.of(context)!.self!.doctor_id =
-            accept ? doctorCognitoId : null;
-      });
+      patientState.patient!.doctor_id = accept ? doctorCognitoId : null;
+      patientState.update();
     } else {
       // display an error message
       showErrorDialog("Can't repspond to doctor's request.", context);
@@ -133,37 +134,39 @@ class _PatientRevisionsNoDoctorState extends State<PatientRevisionsNoDoctor> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Container(
-          height: 116.0,
-          padding: const EdgeInsets.only(left: 20, right: 20, top: 16),
-          color: Colors.transparent,
-          child: Expanded(
-            child: Container(
-                decoration: const BoxDecoration(
-                    color: Color(0xFFff6b6b),
-                    borderRadius: BorderRadius.all(Radius.circular(10.0))),
-                child: Center(
-                    child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Padding(
-                        padding: EdgeInsets.only(right: 8.0),
-                        child: Icon(
-                          Icons.info,
-                          color: Colors.cyan,
-                          size: 32,
+        GetBuilder<PatientStateController>(
+          builder: (_) => Container(
+            height: 116.0,
+            padding: const EdgeInsets.only(left: 20, right: 20, top: 16),
+            color: Colors.transparent,
+            child: Expanded(
+              child: Container(
+                  decoration: const BoxDecoration(
+                      color: Color(0xFFff6b6b),
+                      borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                  child: Center(
+                      child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Padding(
+                          padding: EdgeInsets.only(right: 8.0),
+                          child: Icon(
+                            Icons.info,
+                            color: Colors.cyan,
+                            size: 32,
+                          ),
                         ),
-                      ),
-                      Text("No doctor found!",
-                          style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.white)),
-                    ],
-                  ),
-                ))),
+                        Text("No doctor found!",
+                            style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white)),
+                      ],
+                    ),
+                  ))),
+            ),
           ),
         ),
         const Padding(
