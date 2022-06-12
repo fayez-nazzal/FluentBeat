@@ -5,6 +5,7 @@ import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
 import 'package:fluent_beat/classes/live_data.dart';
 import 'package:fluent_beat/pages/client/state/connection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
@@ -124,8 +125,7 @@ class _ClientMonitorState extends State<ClientMonitor> {
     callingReq = true;
 
     http.Response response = await http.post(
-      Uri.parse(
-          "${dotenv.env["API_URL"]/invoke_sklearn"),
+      Uri.parse("${dotenv.env["API_URL"]}/invoke_sklearn"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:fluent_beat/classes/user.dart';
 import 'package:fluent_beat/pages/client/revisions/revisions.dart';
+import 'package:fluent_beat/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../../../classes/storage_repository.dart';
@@ -37,7 +38,12 @@ class _PatientRevisionsNoDoctorState extends State<PatientRevisionsNoDoctor> {
     var body = jsonDecode(utf8.decode(response.bodyBytes));
 
     // last, map the values taken from results to User class, this will result into a list of Users
-    var doctors = body.map(User.fromJson).toList();
+    var doctors = [];
+
+    for (var json in body) {
+      var doctor = await User.fromJson(json);
+      doctors.add(doctor);
+    }
 
     if (doctors != null) {
       for (var doctor in doctors) {
@@ -112,26 +118,7 @@ class _PatientRevisionsNoDoctorState extends State<PatientRevisionsNoDoctor> {
       });
     } else {
       // display an error message
-      AlertDialog alert = AlertDialog(
-        title: const Text("An error occured"),
-        content: const Text("Can't repspond to doctor's request."),
-        actions: [
-          ElevatedButton(
-              onPressed: () {
-                // hide dialog
-                Navigator.of(context).pop();
-              },
-              child: const Text("OK")),
-        ],
-      );
-
-      // show the dialog
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return alert;
-        },
-      );
+      showErrorDialog("Can't repspond to doctor's request.", context);
     }
   }
 
@@ -169,7 +156,7 @@ class _PatientRevisionsNoDoctorState extends State<PatientRevisionsNoDoctor> {
                           size: 32,
                         ),
                       ),
-                      Text("You have no doctor!",
+                      Text("No doctor found!",
                           style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w500,
