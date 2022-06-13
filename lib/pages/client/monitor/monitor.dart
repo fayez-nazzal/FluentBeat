@@ -74,7 +74,7 @@ class _ClientMonitorState extends State<ClientMonitor> {
 
     time = chartData.length;
     bpmTimer = Timer.periodic(const Duration(seconds: 1), _updateBPM);
-    sampleTimer = Timer.periodic(const Duration(seconds: 8), _attemptPredict);
+    sampleTimer = Timer.periodic(const Duration(seconds: 15), _attemptPredict);
 
     _attemptConnect(null);
     Timer.periodic(const Duration(seconds: 12), _attemptConnect);
@@ -168,6 +168,70 @@ class _ClientMonitorState extends State<ClientMonitor> {
     callingReq = false;
   }
 
+  void onBluetoothListen(Uint8List data) {
+    // clientConnection.connection!.output.add(data);
+
+    if (clientConnection.shouldDisconnect) {
+      clientConnection.connection!.finish();
+      clientConnection.shouldDisconnect = false;
+
+      return;
+    }
+
+    String decodedData = ascii.decode(data);
+
+    RegExp digitExp = RegExp(r'(\d)');
+
+    var splittedDecodedData = decodedData.split("");
+
+    print(decodedData);
+
+    for (var element in splittedDecodedData) {
+      if (bufferStr.length > 2 &&
+          bufferStr.endsWith("E") &&
+          bufferStr.startsWith("E")) {
+        String data = bufferStr.substring(1, bufferStr.length - 1);
+
+        int x = int.parse(data);
+
+        // make sure it is not clapped
+        x = x < xMin ? xMin : x;
+        x = x > xMax ? xMax : x;
+
+        samplesPassed++;
+
+        double normX = (x - xMin) / (xMax - xMin);
+        time += 1;
+
+        if (appendData.length < 10) {
+          LiveData liveData = LiveData(time, normX);
+          appendData.add(liveData);
+        }
+
+        // for bpm measurement
+        bpmBuffer.add(normX);
+
+        // for prediction
+        normBuffer.add(normX);
+
+        if (isRecording) {
+          revisionBuffer.add(normX);
+        }
+
+        bufferStr = "E";
+      }
+
+      if (element != "!" && (element == "E" || digitExp.hasMatch(element))) {
+        bufferStr += element;
+      }
+
+      // in case wrong thing happens to bufferStr
+      if (bufferStr.contains("EE")) {
+        bufferStr = "";
+      }
+    }
+  }
+
   void _attemptConnect(Timer? timer) async {
     // if is connected, return
     if (clientConnection.connection?.isConnected ?? false) {
@@ -183,71 +247,10 @@ class _ClientMonitorState extends State<ClientMonitor> {
 
       appendData = [];
 
-      clientConnection.connection?.input!.listen((Uint8List data) {
-        // clientConnection.connection!.output.add(data);
-
-        if (clientConnection.shouldDisconnect) {
-          clientConnection.connection!.finish();
-          clientConnection.shouldDisconnect = false;
-
-          return;
-        }
-
-        String decodedData = ascii.decode(data);
-
-        RegExp digitExp = RegExp(r'(\d)');
-
-        var splittedDecodedData = decodedData.split("");
-
-        print(decodedData);
-
-        for (var element in splittedDecodedData) {
-          if (bufferStr.length > 2 &&
-              bufferStr.endsWith("E") &&
-              bufferStr.startsWith("E")) {
-            String data = bufferStr.substring(1, bufferStr.length - 1);
-
-            int x = int.parse(data);
-
-            samplesPassed++;
-
-            double normX = (x - xMin) / (xMax - xMin);
-            time += 1;
-
-            if (appendData.length < 10) {
-              LiveData liveData = LiveData(time, normX);
-              appendData.add(liveData);
-            }
-
-            // for bpm measurement
-            bpmBuffer.add(normX);
-
-            // for prediction
-            normBuffer.add(normX);
-
-            if (isRecording) {
-              revisionBuffer.add(normX);
-            }
-
-            bufferStr = "E";
-          }
-
-          if (element != "!" &&
-              (element == "E" || digitExp.hasMatch(element))) {
-            bufferStr += element;
-          }
-
-          // in case wrong thing happens to bufferStr
-          if (bufferStr.contains("EE")) {
-            bufferStr = "";
-          }
-        }
-      });
+      clientConnection.connection?.input!.listen(onBluetoothListen);
     } catch (exception) {
       // TODO handle this sonehow
     }
-
-    setState(() {});
   }
 
   void createRevision() async {

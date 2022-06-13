@@ -1,12 +1,38 @@
+import 'dart:io';
 import 'package:fluent_beat/classes/revision.dart';
+import 'package:fluent_beat/classes/storage_repository.dart';
 import 'package:fluent_beat/pages/client/state/patient.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:open_file/open_file.dart';
+import 'package:path_provider/path_provider.dart';
 
-class CurrentRevision extends StatelessWidget {
+class CurrentRevision extends StatefulWidget {
   final Revision revision;
   const CurrentRevision({Key? key, required this.revision}) : super(key: key);
+
+  @override
+  State<CurrentRevision> createState() => _CurrentRevisionState();
+}
+
+class _CurrentRevisionState extends State<CurrentRevision> {
+  ImageProvider? imageProvider;
+
+  @override
+  void initState() {
+    super.initState();
+
+    downloadImage();
+  }
+
+  Future downloadImage() async {
+    File imageFile =
+        (await StorageRepository.getImage(widget.revision.getId(), "png"))!;
+
+    setState(() {
+      imageProvider = FileImage(imageFile);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +66,7 @@ class CurrentRevision extends StatelessWidget {
                                     fontSize: 16,
                                     fontWeight: FontWeight.w500,
                                     color: Colors.black)),
-                            Text(revision.getShortId(),
+                            Text(widget.revision.getShortId(),
                                 style: const TextStyle(
                                   fontSize: 10,
                                 )),
@@ -48,7 +74,7 @@ class CurrentRevision extends StatelessWidget {
                         ),
                       ),
                       const Spacer(),
-                      Text(revision.getDaysAgo())
+                      Text(widget.revision.getDaysAgo())
                     ],
                   )
                 ],
@@ -57,6 +83,51 @@ class CurrentRevision extends StatelessWidget {
           ),
           // large empty card
         ),
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: 8.0),
+          child: Row(
+            children: [
+              const Text("ECG Report",
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black)),
+              // button to view ECG in viewer
+              const Spacer(),
+              if (imageProvider != null)
+                ElevatedButton(
+                  onPressed: () async {
+                    final documentsDir =
+                        await getApplicationDocumentsDirectory();
+                    final filepath =
+                        '${documentsDir.path}/${widget.revision.getId()}.png';
+                    final file = File(filepath);
+
+                    // open file with default app
+                    if (await file.exists()) {
+                      await OpenFile.open(filepath);
+                    }
+                  },
+                  child: const Text("Open in gallery"),
+                ),
+            ],
+          ),
+        ),
+        // show scrollable image
+        if (imageProvider != null)
+          Container(
+            color: Colors.white,
+            child: SizedBox(
+              height: 230,
+              width: double.infinity,
+              child: InteractiveViewer(
+                child: Image(
+                  image: imageProvider!,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+          ),
       ],
     );
   }

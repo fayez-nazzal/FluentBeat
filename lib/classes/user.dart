@@ -27,7 +27,7 @@ class User {
 
   static Future<User> fromJson(json) async {
     String id = json['id'];
-    File? imageFile = await StorageRepository.getProfileImage(id);
+    File? imageFile = await StorageRepository.getImage(id, "jpg");
 
     Image image = imageFile != null
         ? Image.file(imageFile)
@@ -77,7 +77,7 @@ class Patient extends User {
     User doctor = await User.fromJson(json['doctor']);
 
     String id = json['id'];
-    File? imageFile = await StorageRepository.getProfileImage(id);
+    File? imageFile = await StorageRepository.getImage(id, "jpg");
 
     Image image = imageFile != null
         ? Image.file(imageFile)

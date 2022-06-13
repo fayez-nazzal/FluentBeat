@@ -71,7 +71,7 @@ class _DoctorPatientsState extends State<DoctorPatients> {
     if (patients != null) {
       for (var patient in patients!) {
         File? patientImageFile =
-            await StorageRepository.getProfileImage(patient.id);
+            await StorageRepository.getImage(patient.id, "jpg");
 
         Image patientImage = patientImageFile != null
             ? Image.file(patientImageFile)

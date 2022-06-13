@@ -43,6 +43,7 @@ dependencies:
   path_provider: ^2.0.11
   flutter_dotenv: ^5.0.2
   timeago: ^3.2.2
+  open_file: ^2.1.1
 
 dev_dependencies:
   flutter_test:

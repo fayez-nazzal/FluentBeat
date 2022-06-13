@@ -29,10 +29,10 @@ class StorageRepository {
     }
   }
 
-  static Future<File?> getProfileImage(String userId) async {
+  static Future<File?> getImage(String id, String format) async {
     try {
       final documentsDir = await getApplicationDocumentsDirectory();
-      final filepath = '${documentsDir.path}/$userId.jpg';
+      final filepath = '${documentsDir.path}/$id.$format';
       final file = File(filepath);
 
       // check if file exists, if so, return it
@@ -40,9 +40,11 @@ class StorageRepository {
         return file;
       }
 
+      print("getting id.$format");
+
       // if not, download it
       final result =
-          await Amplify.Storage.downloadFile(local: file, key: "$userId.jpg");
+          await Amplify.Storage.downloadFile(local: file, key: "$id.$format");
 
       return File(result.file.path);
     } catch (e) {

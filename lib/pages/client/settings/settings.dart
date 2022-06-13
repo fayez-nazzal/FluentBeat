@@ -37,7 +37,7 @@ class _SettingsState extends State<Settings> {
 
   void checkProfileImage() async {
     var user = await Amplify.Auth.getCurrentUser();
-    File? file = await StorageRepository.getProfileImage(user.userId);
+    File? file = await StorageRepository.getImage(user.userId, "jpg");
 
     if (file != null) {
       setState(() {
