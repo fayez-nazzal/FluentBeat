@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 import 'dart:typed_data';
 import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
 import 'package:fluent_beat/classes/live_data.dart';
@@ -49,8 +50,8 @@ class _ClientMonitorState extends State<ClientMonitor> {
   Map<String, int> predictions = {};
 
   // for normalizing data
-  int xMin = 250;
-  int xMax = 650;
+  int xMin = 200;
+  int xMax = 680;
 
   String winnerClass = "";
   String warning = "";
@@ -73,7 +74,7 @@ class _ClientMonitorState extends State<ClientMonitor> {
 
     time = chartData.length;
     bpmTimer = Timer.periodic(const Duration(seconds: 1), _updateBPM);
-    sampleTimer = Timer.periodic(const Duration(seconds: 5), _attemptPredict);
+    sampleTimer = Timer.periodic(const Duration(seconds: 8), _attemptPredict);
 
     _attemptConnect(null);
     Timer.periodic(const Duration(seconds: 12), _attemptConnect);
@@ -85,7 +86,7 @@ class _ClientMonitorState extends State<ClientMonitor> {
     int bpm = 0;
     double bpmBufferMax = -1;
 
-    if (bpmBuffer.length >= 740) {
+    if (bpmBuffer.length >= 1250) {
       for (var element in bpmBuffer) {
         if (element > bpmBufferMax) {
           bpmBufferMax = element;
@@ -113,7 +114,7 @@ class _ClientMonitorState extends State<ClientMonitor> {
       bpmBuffer = [];
 
       setState(() {
-        heartrate = bpm * 10;
+        heartrate = bpm * 6;
       });
     }
   }
@@ -123,8 +124,7 @@ class _ClientMonitorState extends State<ClientMonitor> {
     if (heartrate < 20) return;
     if (callingReq) return;
 
-    // TODO REMOVE THIS LINE
-    return;
+    print("attempt predict");
 
     callingReq = true;
 
@@ -199,6 +199,8 @@ class _ClientMonitorState extends State<ClientMonitor> {
 
         var splittedDecodedData = decodedData.split("");
 
+        print(decodedData);
+
         for (var element in splittedDecodedData) {
           if (bufferStr.length > 2 &&
               bufferStr.endsWith("E") &&
@@ -208,15 +210,6 @@ class _ClientMonitorState extends State<ClientMonitor> {
             int x = int.parse(data);
 
             samplesPassed++;
-
-            // if 300 samples passed
-            if (samplesPassed >= 300) {
-              if (x > xMax) xMax = x;
-
-              if (x < xMin) xMin = x;
-
-              samplesPassed = 1;
-            }
 
             double normX = (x - xMin) / (xMax - xMin);
             time += 1;
