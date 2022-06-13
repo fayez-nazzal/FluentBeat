@@ -118,7 +118,7 @@ class _CurrentRevisionState extends State<CurrentRevision> {
           Container(
             color: Colors.white,
             child: SizedBox(
-              height: 230,
+              height: 136,
               width: double.infinity,
               child: InteractiveViewer(
                 child: Image(
@@ -128,6 +128,31 @@ class _CurrentRevisionState extends State<CurrentRevision> {
               ),
             ),
           ),
+        // comments box ( input )
+        Container(
+          color: Color(0x3386AEAD),
+          child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Container(
+                width: double.infinity,
+                child: Row(
+                  children: [
+                    const Expanded(
+                      child: TextField(
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: "Comments",
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                        onPressed: () {},
+                        color: const Color(0xFFff6b6b),
+                        icon: const Icon(Icons.send))
+                  ],
+                ),
+              )),
+        ),
       ],
     );
   }
