@@ -74,7 +74,7 @@ class _ClientMonitorState extends State<ClientMonitor> {
 
     time = chartData.length;
     bpmTimer = Timer.periodic(const Duration(seconds: 1), _updateBPM);
-    sampleTimer = Timer.periodic(const Duration(seconds: 15), _attemptPredict);
+    sampleTimer = Timer.periodic(const Duration(seconds: 8), _attemptPredict);
 
     _attemptConnect(null);
     Timer.periodic(const Duration(seconds: 12), _attemptConnect);
