@@ -30,8 +30,13 @@ class _ClientMonitorState extends State<ClientMonitor> {
   List<double> normBuffer = <double>[];
   List<double> bpmBuffer = <double>[];
   List<double> revisionBuffer = <double>[];
-  int heartrate = 90;
+  int heartrate = 0;
+
+  // WE USE BufferStr for 2 purposes
+  // 1- Save data received from bluetooth
+  // 2- Check if the patient is connected with the ECG device
   String bufferStr = "";
+
   List<LiveData> chartData = <LiveData>[];
   List<LiveData> appendData = <LiveData>[];
   ChartSeriesController? _chartSeriesController;
@@ -112,6 +117,33 @@ class _ClientMonitorState extends State<ClientMonitor> {
 
   int secs = 0;
 
+  void _updatePredictionText() {
+    predictionCardStatus["title"] = predictionText[winnerClass];
+
+    // Change prediction title only when winnerClass is 0 and BPM is abnormal
+    if (winnerClass == 0 && heartrate < 70) {
+      predictionCardStatus["title"] = abnormalBPMText["low-bpm"];
+      predictionCardStatus["body"] = bodyText["no-risk-bpm"];
+      predictionCardStatus["icon"] = Icons.sentiment_dissatisfied;
+      predictionCardStatus["color"] = Colors.orange;
+    } else if (winnerClass == 0 && heartrate > 120) {
+      predictionCardStatus["title"] = abnormalBPMText["high-bpm"];
+      predictionCardStatus["body"] = bodyText["no-risk-bpm"];
+      predictionCardStatus["icon"] = Icons.sentiment_dissatisfied;
+      predictionCardStatus["color"] = Colors.orange;
+    } else if (winnerClass == 0) {
+      predictionCardStatus["body"] = bodyText["no-risk"];
+    } else if (heartrate < 70) {
+      predictionCardStatus["body"] = bodyText["risk-emergency-low-bpm"];
+      predictionCardStatus["icon"] = Icons.sentiment_very_dissatisfied;
+      predictionCardStatus["color"] = Colors.red;
+    } else if (heartrate > 120) {
+      predictionCardStatus["body"] = bodyText["risk-emergency-high-bpm"];
+      predictionCardStatus["icon"] = Icons.sentiment_very_dissatisfied;
+      predictionCardStatus["color"] = Colors.red;
+    }
+  }
+
   void _updateBPM(Timer timer) {
     int bpm = 0;
     double bpmBufferMax = -1;
@@ -146,27 +178,7 @@ class _ClientMonitorState extends State<ClientMonitor> {
       setState(() {
         heartrate = bpm * 6;
 
-        if (winnerClass == 0 && heartrate < 70) {
-          predictionCardStatus["title"] = abnormalBPMText["low-bpm"];
-          predictionCardStatus["body"] = bodyText["no-risk-bpm"];
-          predictionCardStatus["icon"] = Icons.sentiment_dissatisfied;
-          predictionCardStatus["color"] = Colors.orange;
-        } else if (winnerClass == 0 && heartrate > 120) {
-          predictionCardStatus["title"] = abnormalBPMText["high-bpm"];
-          predictionCardStatus["body"] = bodyText["no-risk-bpm"];
-          predictionCardStatus["icon"] = Icons.sentiment_dissatisfied;
-          predictionCardStatus["color"] = Colors.orange;
-        } else if (heartrate < 70) {
-          predictionCardStatus["title"] = predictionCardStatus["title"];
-          predictionCardStatus["body"] = bodyText["risk-emergency-low-bpm"];
-          predictionCardStatus["icon"] = Icons.sentiment_very_dissatisfied;
-          predictionCardStatus["color"] = Colors.red;
-        } else if (heartrate > 120) {
-          predictionCardStatus["title"] = predictionCardStatus["title"];
-          predictionCardStatus["body"] = bodyText["risk-emergency-high-bpm"];
-          predictionCardStatus["icon"] = Icons.sentiment_very_dissatisfied;
-          predictionCardStatus["color"] = Colors.red;
-        }
+        _updatePredictionText();
       });
     }
   }
@@ -215,6 +227,8 @@ class _ClientMonitorState extends State<ClientMonitor> {
 
     setState(() {
       winnerClass = int.parse(maxKey);
+
+      _updatePredictionText();
     });
 
     callingReq = false;
