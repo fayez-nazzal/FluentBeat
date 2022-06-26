@@ -19,7 +19,7 @@ class Button extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: SizedBox(
-        width: 250,
+        width: 240,
         height: 42,
         child: ElevatedButton(
           onPressed: onPress,

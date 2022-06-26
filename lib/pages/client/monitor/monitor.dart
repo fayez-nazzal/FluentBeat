@@ -30,7 +30,7 @@ class _ClientMonitorState extends State<ClientMonitor> {
   List<double> normBuffer = <double>[];
   List<double> bpmBuffer = <double>[];
   List<double> revisionBuffer = <double>[];
-  int heartrate = 0;
+  int heartrate = 90;
   String bufferStr = "";
   List<LiveData> chartData = <LiveData>[];
   List<LiveData> appendData = <LiveData>[];
@@ -53,11 +53,41 @@ class _ClientMonitorState extends State<ClientMonitor> {
   int xMin = 200;
   int xMax = 680;
 
-  String winnerClass = "";
+  int winnerClass = 0;
   String warning = "";
 
   bool isRecording = false;
   int recordingCountdown = 0;
+
+  List<String> predictionText = <String>[
+    "Normal ECG",
+    "Supraventricular Arrhythmia detected",
+    "Premature Ventricular Contractions detected",
+    "Atrial Fibrillation detected",
+  ];
+
+  Map<String, String> abnormalBPMText = {
+    "high-bpm": "High BPM detected",
+    "low-bpm": "Low BPM detected"
+  };
+
+  final Map<String, String> bodyText = {
+    "no-risk": "No Risk detected, be committed to your revisions for safety.",
+    "no-risk-bpm": "We will notify your doctor in case this persists.",
+    "no-high-risk":
+        "No high Risk Factor, just keep wearing the ECG device for safety.",
+    "risk-emergency-high-bpm": "And your BPM is high, we notified your doctor.",
+    "risk-emergency-low-bpm": "And your BPM is low, we notified your doctor.",
+    "risk-emergency-high":
+        "We notified your doctor, be careful and wait for support.",
+  };
+
+  Map<String, dynamic> predictionCardStatus = {
+    "title": "Normal ECG",
+    "body": "No Risk detected, be committed to your revisions for safety.",
+    "icon": Icons.check,
+    "color": Colors.green,
+  };
 
   static ClientConnectionController get clientConnection => Get.find();
   static PatientStateController get patientState => Get.find();
@@ -115,6 +145,28 @@ class _ClientMonitorState extends State<ClientMonitor> {
 
       setState(() {
         heartrate = bpm * 6;
+
+        if (winnerClass == 0 && heartrate < 70) {
+          predictionCardStatus["title"] = abnormalBPMText["low-bpm"];
+          predictionCardStatus["body"] = bodyText["no-risk-bpm"];
+          predictionCardStatus["icon"] = Icons.sentiment_dissatisfied;
+          predictionCardStatus["color"] = Colors.orange;
+        } else if (winnerClass == 0 && heartrate > 120) {
+          predictionCardStatus["title"] = abnormalBPMText["high-bpm"];
+          predictionCardStatus["body"] = bodyText["no-risk-bpm"];
+          predictionCardStatus["icon"] = Icons.sentiment_dissatisfied;
+          predictionCardStatus["color"] = Colors.orange;
+        } else if (heartrate < 70) {
+          predictionCardStatus["title"] = predictionCardStatus["title"];
+          predictionCardStatus["body"] = bodyText["risk-emergency-low-bpm"];
+          predictionCardStatus["icon"] = Icons.sentiment_very_dissatisfied;
+          predictionCardStatus["color"] = Colors.red;
+        } else if (heartrate > 120) {
+          predictionCardStatus["title"] = predictionCardStatus["title"];
+          predictionCardStatus["body"] = bodyText["risk-emergency-high-bpm"];
+          predictionCardStatus["icon"] = Icons.sentiment_very_dissatisfied;
+          predictionCardStatus["color"] = Colors.red;
+        }
       });
     }
   }
@@ -162,7 +214,7 @@ class _ClientMonitorState extends State<ClientMonitor> {
     });
 
     setState(() {
-      winnerClass = maxKey;
+      winnerClass = int.parse(maxKey);
     });
 
     callingReq = false;
@@ -348,65 +400,118 @@ class _ClientMonitorState extends State<ClientMonitor> {
                 const Text("ECG Signal",
                     style:
                         TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                SfCartesianChart(
-                  plotAreaBackgroundColor: isRecording
-                      ? const Color(0x33CAD7D7)
-                      : const Color(0xaafafafa),
-                  series: [
-                    FastLineSeries<LiveData, int>(
-                        color: const Color(0xff52A1BC),
-                        onRendererCreated: (ChartSeriesController controller) {
-                          // Assigning the controller to the _chartSeriesController.
-                          _chartSeriesController = controller;
-                        },
-                        // Binding the chartData to the dataSource of the line series.
-                        dataSource: chartData,
-                        xValueMapper: (LiveData liveData, _) => liveData.x,
-                        yValueMapper: (LiveData liveData, _) => liveData.y,
-                        animationDuration: 8),
-                  ],
-                  enableAxisAnimation: true,
-                  primaryYAxis: NumericAxis(
-                    minimum: 0.000,
-                    maximum: 1.000,
+                Padding(
+                  padding: const EdgeInsets.only(left: 4.0, right: 8),
+                  child: SfCartesianChart(
+                    plotAreaBackgroundColor: isRecording
+                        ? const Color(0x33CAD7D7)
+                        : const Color(0xaafafafa),
+                    series: [
+                      FastLineSeries<LiveData, int>(
+                          color: const Color(0xff52A1BC),
+                          onRendererCreated:
+                              (ChartSeriesController controller) {
+                            // Assigning the controller to the _chartSeriesController.
+                            _chartSeriesController = controller;
+                          },
+                          // Binding the chartData to the dataSource of the line series.
+                          dataSource: chartData,
+                          xValueMapper: (LiveData liveData, _) => liveData.x,
+                          yValueMapper: (LiveData liveData, _) => liveData.y,
+                          animationDuration: 8),
+                    ],
+                    enableAxisAnimation: true,
+                    primaryYAxis: NumericAxis(
+                      minimum: 0.000,
+                      maximum: 1.000,
+                    ),
+                    primaryXAxis: NumericAxis(isVisible: false),
                   ),
-                  primaryXAxis: NumericAxis(isVisible: false),
                 ),
               ],
             ),
           ),
-          if (predictions[winnerClass] != null)
-            Text("winner is $winnerClass for ${predictions[winnerClass]!}"),
-          Text(warning),
-          Text(revisionBuffer.length.toString()),
-          Button(
-              bg: 0xFFff6b6b,
-              text: isRecording
-                  ? "Recording $recordingCountdown/60 (Stop)"
-                  : "Record for Revision",
-              onPress: () {
-                if (isRecording) createRevision();
+          Padding(
+            padding:
+                const EdgeInsets.only(top: 6, bottom: 12, left: 12, right: 12),
+            child: Card(
+              child: SizedBox(
+                width: double.infinity,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        predictionCardStatus['icon'],
+                        color: predictionCardStatus['color'],
+                        size: 24,
+                      ),
+                      SizedBox(
+                        width: 8,
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            predictionCardStatus['title']!,
+                            style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: predictionCardStatus['color']),
+                          ),
+                          SizedBox(
+                            height: 2,
+                          ),
+                          SizedBox(
+                            width: 240,
+                            child: Text(
+                              predictionCardStatus['body'],
+                              style: TextStyle(
+                                  fontSize: 13.0,
+                                  color: Color(0xff333333),
+                                  fontWeight: FontWeight.w500),
+                            ),
+                          )
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          ElevatedButton(
+              child: Text(
+                  isRecording
+                      ? "Recording $recordingCountdown/60 (Stop)"
+                      : "Record for Revision",
+                  style: TextStyle(fontSize: 16)),
+              onPressed: normBuffer.isEmpty
+                  ? null
+                  : () {
+                      if (isRecording) createRevision();
 
-                setState(() {
-                  isRecording = !isRecording;
-
-                  if (isRecording) {
-                    recordingCountdown = 60;
-
-                    Timer.periodic(const Duration(seconds: 1), (timer) {
                       setState(() {
-                        recordingCountdown -= 1;
+                        isRecording = !isRecording;
 
-                        if (recordingCountdown <= 0 || !isRecording) {
-                          timer.cancel();
-                          isRecording = false;
-                          recordingCountdown = 0;
+                        if (isRecording) {
+                          recordingCountdown = 60;
+
+                          Timer.periodic(const Duration(seconds: 1), (timer) {
+                            setState(() {
+                              recordingCountdown -= 1;
+
+                              if (recordingCountdown <= 0 || !isRecording) {
+                                timer.cancel();
+                                isRecording = false;
+                                recordingCountdown = 0;
+                              }
+                            });
+                          });
                         }
                       });
-                    });
-                  }
-                });
-              }),
+                    }),
         ],
       ),
     );
