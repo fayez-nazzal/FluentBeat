@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
 class StorageRepository {
-  static Future<File> uploadProfileImage(File file, String userId) async {
+  static Future<File?> uploadProfileImage(File file, String userId) async {
     try {
-      imageCache.clear();
+      // imageCache.clear();
 
       await Amplify.Storage.uploadFile(local: file, key: "$userId.jpg");
 
@@ -25,7 +25,7 @@ class StorageRepository {
 
       return file;
     } catch (e) {
-      rethrow;
+      // rethrow;
     }
   }
 

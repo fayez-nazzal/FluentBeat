@@ -19,7 +19,7 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       theme: ThemeData(
-        fontFamily: "Proxima Nova",
+        fontFamily: "Montserrat",
         colorScheme: ColorScheme.fromSwatch(
           primarySwatch: const MaterialColor(0xFFff6b6b, {
             50: Color(0xFF000000),

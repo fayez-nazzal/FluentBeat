@@ -85,7 +85,7 @@ class _SettingsState extends State<Settings> {
                 if (pickedFile != null) {
                   var user = await Amplify.Auth.getCurrentUser();
 
-                  File file = await StorageRepository.uploadProfileImage(
+                  File? file = await StorageRepository.uploadProfileImage(
                       File(pickedFile.path), user.userId);
 
                   setState(() {
