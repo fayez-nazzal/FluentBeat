@@ -94,7 +94,7 @@ flutter_icons:
   fonts:
     - family: Lobster
       fonts:
-        - asset: fonts/ProximaNova.otf
+        - asset: fonts/Montserrat.ttf
 
   #       - asset: fonts/Schyler-Italic.ttf
   #         style: italic
