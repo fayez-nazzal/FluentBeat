@@ -3,11 +3,11 @@ import 'package:timeago/timeago.dart' as timeago;
 
 class Comment {
   final String revision_id;
-  final String date;
+  String date;
   final String by;
   final String body;
 
-  const Comment(
+  Comment(
       {required this.revision_id,
       required this.date,
       required this.by,

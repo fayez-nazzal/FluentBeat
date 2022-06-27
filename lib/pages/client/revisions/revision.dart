@@ -35,21 +35,44 @@ class _CurrentRevisionState extends State<CurrentRevision> {
   }
 
   Future downloadImage() async {
-    File imageFile = (await StorageRepository.getImage(
-        widget.revision.getId() + "_h", "png"))!;
+    // download vertical image
+    await StorageRepository.getImage(widget.revision.getId(), "png");
 
-    setState(() {
-      imageProvider = FileImage(imageFile);
+    // download horizontal image
+    File? imageFile = (await StorageRepository.getImage(
+        widget.revision.getId() + "_h", "png"));
 
-      // Wait until the ECG image become attached to scrollView
-      Future.delayed(const Duration(milliseconds: 50), () {
-        // scroll a bit to make the ECG image look better from the start
-        _scrollController.jumpTo(32);
+    // widget should be mounted, check if so to prevent errors
+    if (mounted && imageFile != null) {
+      setState(() {
+        imageProvider = FileImage(imageFile);
+
+        // Wait until the ECG image become attached to scrollView
+        Future.delayed(const Duration(milliseconds: 50), () {
+          // scroll a bit to make the ECG image look better from the start
+          _scrollController.jumpTo(32);
+        });
       });
-    });
+    }
   }
 
   void sendComment() async {
+    String commentBody = commentField.text;
+
+    // clear comment text field and add comment before everything ( makes user feel it is fast )
+
+    Comment comment = Comment(
+      revision_id: widget.revision.getId(),
+      body: commentBody,
+      by: "USER",
+      date: DateTime.now().toString(),
+    );
+
+    setState(() {
+      commentField.text = "";
+      widget.revision.comments.add(comment);
+    });
+
     String revisionId = widget.revision.getId();
 
     var client = http.Client();
@@ -61,7 +84,7 @@ class _CurrentRevisionState extends State<CurrentRevision> {
         body: jsonEncode(<String, dynamic>{
           "by": "USER",
           "revision_id": revisionId,
-          "comment_body": commentField.text
+          "comment_body": commentBody
         }));
 
     if (response.statusCode == 200) {
@@ -69,8 +92,9 @@ class _CurrentRevisionState extends State<CurrentRevision> {
       var jsonBody = Map<String, dynamic>.from(resJson['body']);
 
       setState(() {
-        commentField.text = "";
-        widget.revision.comments.add(Comment.fromJson(jsonBody));
+        comment.date = jsonBody['date'];
+
+        widget.revision.comments[widget.revision.comments.length - 1] = comment;
       });
     } else {
       showErrorDialog("Unable to comment on revision.", context);
@@ -175,7 +199,8 @@ class _CurrentRevisionState extends State<CurrentRevision> {
                     child: Container(
                       color: Color(0x3386AEAD),
                       child: Padding(
-                          padding: const EdgeInsets.all(8.0),
+                          padding: const EdgeInsets.only(
+                              top: 18, left: 8, right: 8, bottom: 8),
                           child: Column(
                             children: [
                               Container(
@@ -189,6 +214,10 @@ class _CurrentRevisionState extends State<CurrentRevision> {
                                           border: OutlineInputBorder(),
                                           labelText: "Comments",
                                         ),
+                                        onSubmitted: null,
+                                        textInputAction:
+                                            TextInputAction.newline,
+                                        maxLines: null,
                                       ),
                                     ),
                                     IconButton(
@@ -212,12 +241,26 @@ class _CurrentRevisionState extends State<CurrentRevision> {
                                           var comment =
                                               widget.revision.comments[index];
 
-                                          return ListTile(
-                                            leading:
-                                                patientState.patient!.image,
-                                            title: Text(comment.body),
-                                            subtitle:
-                                                Text(comment.getDaysAgo()),
+                                          return Column(
+                                            children: [
+                                              ListTile(
+                                                leading: ClipRRect(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8.0),
+                                                    child: patientState
+                                                        .patient!.image),
+                                                title: Text(comment.body),
+                                                subtitle:
+                                                    Text(comment.getDaysAgo()),
+                                              ),
+                                              Divider(
+                                                height: 3,
+                                                thickness: 2,
+                                                color: Colors.grey
+                                                    .withOpacity(0.22),
+                                              ),
+                                            ],
                                           );
                                         }),
                                   ),
