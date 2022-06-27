@@ -164,7 +164,7 @@ class _PatientRevisionsNoDoctorState extends State<PatientRevisionsNoDoctor> {
                           style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w500,
-                              color: Colors.black)),
+                              color: Colors.black87)),
                     ],
                   ),
                 ))),
@@ -177,7 +177,7 @@ class _PatientRevisionsNoDoctorState extends State<PatientRevisionsNoDoctor> {
                 style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w500,
-                    color: Colors.black)),
+                    color: Colors.black87)),
           ),
           Expanded(
             child: Padding(
