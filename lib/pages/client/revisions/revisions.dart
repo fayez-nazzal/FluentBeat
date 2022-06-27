@@ -156,6 +156,7 @@ class PatientRevisionsState extends State<PatientRevisions> {
                       child: Padding(
                         padding: const EdgeInsets.only(top: 10.0),
                         child: Scrollbar(
+                          thumbVisibility: true,
                           child: ListView.builder(
                               shrinkWrap: true,
                               scrollDirection: Axis.vertical,
