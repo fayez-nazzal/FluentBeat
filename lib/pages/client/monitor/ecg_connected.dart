@@ -282,7 +282,7 @@ class _ClientMonitorECGConnectedState extends State<ClientMonitorECGConnected> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("My Heart"),
+        title: const Text("Monitor"),
         actions: [
           IconButton(
               onPressed: () {}, icon: const Icon(Icons.chat_bubble_rounded)),

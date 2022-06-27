@@ -160,7 +160,7 @@ class _PatientRevisionsNoDoctorState extends State<PatientRevisionsNoDoctor> {
                           size: 32,
                         ),
                       ),
-                      Text("No doctor found!",
+                      Text("You don't have a doctor",
                           style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w500,

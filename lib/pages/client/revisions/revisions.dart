@@ -114,7 +114,7 @@ class PatientRevisionsState extends State<PatientRevisions> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text("My Doctor:",
+                          const Text("Your Doctor:",
                               style: TextStyle(
                                   fontSize: 14, color: Colors.black54)),
                           const SizedBox(height: 4),
@@ -139,7 +139,7 @@ class PatientRevisionsState extends State<PatientRevisions> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text("My Revisions",
+                  const Text("Your Revisions",
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
                   IconButton(

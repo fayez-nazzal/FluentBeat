@@ -61,7 +61,7 @@ class _ClientPageState extends State<ClientPage> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.monitor_heart),
-            label: "My Heart",
+            label: "Monitor",
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.access_time),
