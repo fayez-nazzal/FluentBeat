@@ -41,9 +41,9 @@ class _CurrentRevisionState extends State<CurrentRevision> {
         builder: (_) => Column(
               children: [
                 Container(
-                  height: 80.0,
+                  height: 68.0,
                   width: double.infinity,
-                  padding: const EdgeInsets.only(left: 20, right: 20, top: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   color: Colors.transparent,
                   child: Expanded(
                       child: Card(
@@ -85,32 +85,35 @@ class _CurrentRevisionState extends State<CurrentRevision> {
                 ),
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: 8.0),
-                  child: Row(
-                    children: [
-                      const Text("ECG Report",
-                          style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black)),
-                      // button to view ECG in viewer
-                      const Spacer(),
-                      if (imageProvider != null)
-                        ElevatedButton(
-                          onPressed: () async {
-                            final documentsDir =
-                                await getApplicationDocumentsDirectory();
-                            final filepath =
-                                '${documentsDir.path}/${widget.revision.getId()}.png';
-                            final file = File(filepath);
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Row(
+                      children: [
+                        const Text("ECG Report",
+                            style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black)),
+                        // button to view ECG in viewer
+                        const Spacer(),
+                        if (imageProvider != null)
+                          ElevatedButton(
+                            onPressed: () async {
+                              final documentsDir =
+                                  await getApplicationDocumentsDirectory();
+                              final filepath =
+                                  '${documentsDir.path}/${widget.revision.getId()}.png';
+                              final file = File(filepath);
 
-                            // open file with default app
-                            if (await file.exists()) {
-                              await OpenFile.open(filepath);
-                            }
-                          },
-                          child: const Text("Open in gallery"),
-                        ),
-                    ],
+                              // open file with default app
+                              if (await file.exists()) {
+                                await OpenFile.open(filepath);
+                              }
+                            },
+                            child: const Text("Open in gallery"),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
                 // show scrollable image

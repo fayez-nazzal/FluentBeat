@@ -83,92 +83,102 @@ class PatientRevisionsState extends State<PatientRevisions> {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<PatientStateController>(
-        builder: (_) => Column(
-              children: [
-                if (patientState.patient != null &&
-                    patientState.patient!.doctor_id == null)
-                  PatientRevisionsNoDoctor()
-                else if (currentRevision == null &&
-                    patientState.patient != null &&
-                    patientState.patient!.doctor != null)
-                  Container(
-                    height: 116.0,
-                    padding:
-                        const EdgeInsets.only(left: 20, right: 20, top: 16),
-                    color: Colors.transparent,
-                    child: Expanded(
-                      child: Container(
-                          decoration: const BoxDecoration(
-                              color: Color(0xFFff6b6b),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(10.0))),
-                          child: Center(
-                              child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Row(
-                              children: [
-                                ClipRRect(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    child: patientState.patient!.doctor!.image),
-                                const Spacer(),
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text("My Doctor:",
-                                        style: TextStyle(
-                                            fontSize: 14, color: Colors.white)),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                        "  ${patientState.patient!.doctor!.name}",
-                                        style: const TextStyle(
-                                            fontSize: 21,
-                                            fontWeight: FontWeight.w700,
-                                            color: Colors.white)),
-                                  ],
-                                ),
-                                const Spacer(flex: 2)
-                              ],
-                            ),
-                          ))),
+    return Expanded(
+      child: GetBuilder<PatientStateController>(
+          builder: (_) => Column(
+                children: [
+                  if (patientState.patient != null &&
+                      patientState.patient!.doctor_id == null)
+                    PatientRevisionsNoDoctor()
+                  else if (currentRevision == null &&
+                      patientState.patient != null &&
+                      patientState.patient!.doctor != null)
+                    Container(
+                      height: 116.0,
+                      padding:
+                          const EdgeInsets.only(left: 20, right: 20, top: 16),
+                      color: Colors.transparent,
+                      child: Expanded(
+                        child: Container(
+                            decoration: const BoxDecoration(
+                                color: Color(0xFFff6b6b),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(10.0))),
+                            child: Center(
+                                child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Row(
+                                children: [
+                                  ClipRRect(
+                                      borderRadius: BorderRadius.circular(8.0),
+                                      child:
+                                          patientState.patient!.doctor!.image),
+                                  const Spacer(),
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Text("My Doctor:",
+                                          style: TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.white)),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                          "  ${patientState.patient!.doctor!.name}",
+                                          style: const TextStyle(
+                                              fontSize: 21,
+                                              fontWeight: FontWeight.w700,
+                                              color: Colors.white)),
+                                    ],
+                                  ),
+                                  const Spacer(flex: 2)
+                                ],
+                              ),
+                            ))),
+                      ),
                     ),
-                  ),
-                if (currentRevision == null)
-                  ElevatedButton(
-                      onPressed: listRevisions, child: const Text("Revisions")),
-                if (currentRevision == null)
-                  const Padding(
-                    padding: EdgeInsets.only(top: 32.0),
-                    child: Text("My Revision",
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black)),
-                  ),
-                if (currentRevision == null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10.0),
-                    child: ListView.builder(
-                        shrinkWrap: true,
-                        scrollDirection: Axis.vertical,
-                        itemCount: revisionsTiles.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          return revisionsTiles[
-                              revisionsTiles.length - index - 1];
-                        }),
-                  ),
-                if (currentRevision != null)
-                  IconButton(
-                      onPressed: () {
-                        setState(() {
-                          currentRevision = null;
-                        });
-                      },
-                      icon: const Icon(Icons.arrow_back)),
-                if (currentRevision != null)
-                  CurrentRevision(revision: currentRevision!)
-              ],
-            ));
+                  if (currentRevision == null)
+                    ElevatedButton(
+                        onPressed: listRevisions,
+                        child: const Text("Revisions")),
+                  if (currentRevision == null)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 32.0),
+                      child: Text("My Revision",
+                          style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black)),
+                    ),
+                  if (currentRevision == null)
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 10.0),
+                        child: Scrollbar(
+                          child: ListView.builder(
+                              shrinkWrap: true,
+                              scrollDirection: Axis.vertical,
+                              itemCount: revisionsTiles.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return revisionsTiles[
+                                    revisionsTiles.length - index - 1];
+                              }),
+                        ),
+                      ),
+                    ),
+                  if (currentRevision != null)
+                    ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            currentRevision = null;
+                          });
+                        },
+                        child: const Text("Back to revisions")),
+                  if (currentRevision != null)
+                    CurrentRevision(revision: currentRevision!)
+                ],
+              )),
+    );
   }
 }
