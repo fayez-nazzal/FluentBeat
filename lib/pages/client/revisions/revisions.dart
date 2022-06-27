@@ -79,6 +79,8 @@ class PatientRevisionsState extends State<PatientRevisions> {
   @override
   void initState() {
     super.initState();
+
+    listRevisions();
   }
 
   @override
@@ -99,73 +101,66 @@ class PatientRevisionsState extends State<PatientRevisions> {
                           const EdgeInsets.only(left: 20, right: 20, top: 16),
                       color: Colors.transparent,
                       child: Expanded(
-                        child: Container(
-                            decoration: const BoxDecoration(
-                                color: Color(0xFFff6b6b),
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(10.0))),
+                        child: Card(
                             child: Center(
                                 child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Row(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            children: [
+                              ClipRRect(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  child: patientState.patient!.doctor!.image),
+                              const Spacer(),
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  ClipRRect(
-                                      borderRadius: BorderRadius.circular(8.0),
-                                      child:
-                                          patientState.patient!.doctor!.image),
-                                  const Spacer(),
-                                  Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const Text("My Doctor:",
-                                          style: TextStyle(
-                                              fontSize: 14,
-                                              color: Colors.white)),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                          "  ${patientState.patient!.doctor!.name}",
-                                          style: const TextStyle(
-                                              fontSize: 21,
-                                              fontWeight: FontWeight.w700,
-                                              color: Colors.white)),
-                                    ],
-                                  ),
-                                  const Spacer(flex: 2)
+                                  const Text("My Doctor:",
+                                      style: TextStyle(
+                                          fontSize: 14, color: Colors.black54)),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                      "  ${patientState.patient!.doctor!.name}",
+                                      style: const TextStyle(
+                                          fontSize: 21,
+                                          fontWeight: FontWeight.w700,
+                                          color: Colors.black87)),
                                 ],
                               ),
-                            ))),
+                              const Spacer(flex: 2)
+                            ],
+                          ),
+                        ))),
                       ),
                     ),
                   if (currentRevision == null)
-                    ElevatedButton(
-                        onPressed: listRevisions,
-                        child: const Text("Revisions")),
-                  if (currentRevision == null)
-                    const Padding(
-                      padding: EdgeInsets.only(top: 32.0),
-                      child: Text("My Revision",
-                          style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black)),
+                    // refresh button
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text("My Revisions",
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.w700)),
+                          IconButton(
+                              onPressed: listRevisions,
+                              icon: const Icon(Icons.refresh)),
+                        ],
+                      ),
                     ),
                   if (currentRevision == null)
                     Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 10.0),
-                        child: Scrollbar(
-                          thumbVisibility: true,
-                          child: ListView.builder(
-                              shrinkWrap: true,
-                              scrollDirection: Axis.vertical,
-                              itemCount: revisionsTiles.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                return revisionsTiles[
-                                    revisionsTiles.length - index - 1];
-                              }),
-                        ),
+                      child: Scrollbar(
+                        thumbVisibility: true,
+                        child: ListView.builder(
+                            shrinkWrap: true,
+                            scrollDirection: Axis.vertical,
+                            itemCount: revisionsTiles.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return revisionsTiles[
+                                  revisionsTiles.length - index - 1];
+                            }),
                       ),
                     ),
                   if (currentRevision != null)
@@ -175,21 +170,18 @@ class PatientRevisionsState extends State<PatientRevisions> {
                           currentRevision = null;
                         });
                       },
-                      child: Container(
+                      child: SizedBox(
                         width: 160,
                         child: Row(
-                          children: [
+                          children: const [
                             Icon(
                               Icons.arrow_back,
                               color: Colors.black,
                             ),
-                            const Text("Go back to revisions",
+                            Text("Go back to revisions",
                                 style: TextStyle(color: Colors.black)),
                           ],
                         ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        primary: Colors.white,
                       ),
                     ),
                   if (currentRevision != null)

@@ -231,38 +231,41 @@ class _CurrentRevisionState extends State<CurrentRevision> {
                                 child: Padding(
                                   padding: const EdgeInsets.only(top: 10.0),
                                   child: Expanded(
-                                    child: ListView.builder(
-                                        shrinkWrap: true,
-                                        scrollDirection: Axis.vertical,
-                                        itemCount:
-                                            widget.revision.comments.length,
-                                        itemBuilder:
-                                            (BuildContext context, int index) {
-                                          var comment =
-                                              widget.revision.comments[index];
+                                    child: Scrollbar(
+                                      thumbVisibility: true,
+                                      child: ListView.builder(
+                                          shrinkWrap: true,
+                                          scrollDirection: Axis.vertical,
+                                          itemCount:
+                                              widget.revision.comments.length,
+                                          itemBuilder: (BuildContext context,
+                                              int index) {
+                                            var comment =
+                                                widget.revision.comments[index];
 
-                                          return Column(
-                                            children: [
-                                              ListTile(
-                                                leading: ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8.0),
-                                                    child: patientState
-                                                        .patient!.image),
-                                                title: Text(comment.body),
-                                                subtitle:
-                                                    Text(comment.getDaysAgo()),
-                                              ),
-                                              Divider(
-                                                height: 3,
-                                                thickness: 2,
-                                                color: Colors.grey
-                                                    .withOpacity(0.22),
-                                              ),
-                                            ],
-                                          );
-                                        }),
+                                            return Column(
+                                              children: [
+                                                ListTile(
+                                                  leading: ClipRRect(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              8.0),
+                                                      child: patientState
+                                                          .patient!.image),
+                                                  title: Text(comment.body),
+                                                  subtitle: Text(
+                                                      comment.getDaysAgo()),
+                                                ),
+                                                Divider(
+                                                  height: 3,
+                                                  thickness: 2,
+                                                  color: Colors.grey
+                                                      .withOpacity(0.22),
+                                                ),
+                                              ],
+                                            );
+                                          }),
+                                    ),
                                   ),
                                 ),
                               ),
