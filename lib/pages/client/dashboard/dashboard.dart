@@ -30,10 +30,10 @@ class ClientDashboard extends StatelessWidget {
                         children: [
                           ClipRRect(
                             borderRadius: BorderRadius.circular(8.0),
-                            child: patientState.patient!.image,
+                            child: patientState.patient?.image ?? Container(),
                           ),
                           const Spacer(),
-                          Text(patientState.patient!.name,
+                          Text(patientState.patient?.name ?? "",
                               style: const TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.w500,
