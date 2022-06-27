@@ -256,7 +256,9 @@ class _PatientRevisionsNoDoctorState extends State<PatientRevisionsNoDoctor> {
                                 ),
 
                                 // if this is the last one, no need for divider
-                                if (doctor.id != doctors[doctors.length - 1].id)
+                                if (doctor.id !=
+                                    filteredDoctors[filteredDoctors.length - 1]
+                                        .id)
                                   Divider(
                                       thickness: 2,
                                       height: 16,
