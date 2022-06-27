@@ -170,6 +170,7 @@ class PatientRevisionsState extends State<PatientRevisions> {
                           currentRevision = null;
                         });
                       },
+                      style: ElevatedButton.styleFrom(primary: Colors.white),
                       child: SizedBox(
                         width: 160,
                         child: Row(
