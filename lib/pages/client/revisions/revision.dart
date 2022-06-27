@@ -118,7 +118,7 @@ class _CurrentRevisionState extends State<CurrentRevision> {
                   SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: SizedBox(
-                          height: 136,
+                          height: 120,
                           child: Image(
                             image: imageProvider!,
                             fit: BoxFit.cover,
