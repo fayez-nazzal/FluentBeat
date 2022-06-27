@@ -10,6 +10,7 @@ import 'package:fluent_beat/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
+import 'package:keyboard_dismisser/keyboard_dismisser.dart';
 
 class PatientRevisions extends StatefulWidget {
   const PatientRevisions({Key? key}) : super(key: key);
@@ -86,110 +87,113 @@ class PatientRevisionsState extends State<PatientRevisions> {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-        child: GetBuilder<PatientStateController>(
-      builder: (_) => Column(
-        children: [
-          if (patientState.patient != null &&
-              patientState.patient!.doctor_id == null)
-            PatientRevisionsNoDoctor()
-          else if (currentRevision == null &&
-              patientState.patient != null &&
-              patientState.patient!.doctor != null)
-            Container(
-              height: 116.0,
-              padding: const EdgeInsets.only(left: 20, right: 20, top: 16),
-              color: Colors.transparent,
-              child: Expanded(
-                child: Card(
-                    child: Center(
-                        child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    children: [
-                      ClipRRect(
-                          borderRadius: BorderRadius.circular(8.0),
-                          child: patientState.patient!.doctor!.image),
-                      const Spacer(),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text("Your Doctor:",
-                              style: TextStyle(
-                                  fontSize: 14, color: Colors.black54)),
-                          const SizedBox(height: 4),
-                          Text("  ${patientState.patient!.doctor!.name}",
-                              style: const TextStyle(
-                                  fontSize: 21,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.black87)),
-                        ],
-                      ),
-                      const Spacer(flex: 2)
-                    ],
-                  ),
-                ))),
-              ),
-            ),
-          if (currentRevision == null &&
-              patientState.patient != null &&
-              patientState.patient!.doctor != null)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text("Your Revisions",
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-                  IconButton(
-                      onPressed: listRevisions,
-                      icon: const Icon(Icons.refresh)),
-                ],
-              ),
-            ),
-          if (currentRevision == null &&
-              patientState.patient != null &&
-              patientState.patient!.doctor != null)
-            Expanded(
-              child: Scrollbar(
-                thumbVisibility: true,
-                child: ListView.builder(
-                    shrinkWrap: true,
-                    scrollDirection: Axis.vertical,
-                    itemCount: revisionsTiles.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return revisionsTiles[revisionsTiles.length - index - 1];
-                    }),
-              ),
-            ),
-          if (currentRevision == null &&
-              patientState.patient != null &&
-              patientState.patient!.doctor != null)
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  currentRevision = null;
-                });
-              },
-              style: ElevatedButton.styleFrom(primary: Colors.white),
-              child: SizedBox(
-                width: 160,
-                child: Row(
-                  children: const [
-                    Icon(
-                      Icons.arrow_back,
-                      color: Colors.black,
+        child: KeyboardDismisser(
+      child: GetBuilder<PatientStateController>(
+        builder: (_) => Column(
+          children: [
+            if (patientState.patient != null &&
+                patientState.patient!.doctor_id == null)
+              PatientRevisionsNoDoctor()
+            else if (currentRevision == null &&
+                patientState.patient != null &&
+                patientState.patient!.doctor != null)
+              Container(
+                height: 116.0,
+                padding: const EdgeInsets.only(left: 20, right: 20, top: 16),
+                color: Colors.transparent,
+                child: Expanded(
+                  child: Card(
+                      child: Center(
+                          child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      children: [
+                        ClipRRect(
+                            borderRadius: BorderRadius.circular(8.0),
+                            child: patientState.patient!.doctor!.image),
+                        const Spacer(),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text("Your Doctor:",
+                                style: TextStyle(
+                                    fontSize: 14, color: Colors.black54)),
+                            const SizedBox(height: 4),
+                            Text("  ${patientState.patient!.doctor!.name}",
+                                style: const TextStyle(
+                                    fontSize: 21,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.black87)),
+                          ],
+                        ),
+                        const Spacer(flex: 2)
+                      ],
                     ),
-                    Text("Go back to revisions",
-                        style: TextStyle(color: Colors.black)),
+                  ))),
+                ),
+              ),
+            if (currentRevision == null &&
+                patientState.patient != null &&
+                patientState.patient!.doctor != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text("Your Revisions",
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.w700)),
+                    IconButton(
+                        onPressed: listRevisions,
+                        icon: const Icon(Icons.refresh)),
                   ],
                 ),
               ),
-            ),
-          if (currentRevision != null)
-            CurrentRevision(revision: currentRevision!)
-        ],
+            if (currentRevision == null &&
+                patientState.patient != null &&
+                patientState.patient!.doctor != null)
+              Expanded(
+                child: Scrollbar(
+                  thumbVisibility: true,
+                  child: ListView.builder(
+                      shrinkWrap: true,
+                      scrollDirection: Axis.vertical,
+                      itemCount: revisionsTiles.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return revisionsTiles[
+                            revisionsTiles.length - index - 1];
+                      }),
+                ),
+              ),
+            if (currentRevision == null &&
+                patientState.patient != null &&
+                patientState.patient!.doctor != null)
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    currentRevision = null;
+                  });
+                },
+                style: ElevatedButton.styleFrom(primary: Colors.white),
+                child: SizedBox(
+                  width: 160,
+                  child: Row(
+                    children: const [
+                      Icon(
+                        Icons.arrow_back,
+                        color: Colors.black,
+                      ),
+                      Text("Go back to revisions",
+                          style: TextStyle(color: Colors.black)),
+                    ],
+                  ),
+                ),
+              ),
+            if (currentRevision != null)
+              CurrentRevision(revision: currentRevision!)
+          ],
+        ),
       ),
     ));
   }
