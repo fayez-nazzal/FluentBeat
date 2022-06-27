@@ -1,6 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
-
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:fluent_beat/classes/user.dart';
 import 'package:fluent_beat/pages/client/state/patient.dart';
@@ -8,7 +6,6 @@ import 'package:fluent_beat/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
-import '../../../classes/storage_repository.dart';
 import 'package:http/http.dart' as http;
 
 class PatientRevisionsNoDoctor extends StatefulWidget {
