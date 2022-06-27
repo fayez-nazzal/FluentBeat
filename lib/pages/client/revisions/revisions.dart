@@ -133,8 +133,9 @@ class PatientRevisionsState extends State<PatientRevisions> {
                         ))),
                       ),
                     ),
-                  if (currentRevision == null)
-                    // refresh button
+                  if (currentRevision == null &&
+                      patientState.patient != null &&
+                      patientState.patient!.doctor != null)
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: Row(
