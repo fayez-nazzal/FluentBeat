@@ -21,7 +21,11 @@ class PatientRevisionsNoDoctor extends StatefulWidget {
 
 class _PatientRevisionsNoDoctorState extends State<PatientRevisionsNoDoctor> {
   List<Doctor> doctors = [];
+  List<Doctor> filteredDoctors = [];
+
   static PatientStateController get patientState => Get.find();
+
+  final TextEditingController _searchController = TextEditingController();
 
   void listDoctors() async {
     String patientCognitoId = (await Amplify.Auth.getCurrentUser()).userId;
@@ -47,7 +51,9 @@ class _PatientRevisionsNoDoctorState extends State<PatientRevisionsNoDoctor> {
       reqDoctors.add(doctor);
     }
     setState(() {
+      _searchController.text = "";
       doctors = reqDoctors;
+      filteredDoctors = reqDoctors;
     });
   }
 
@@ -130,106 +136,144 @@ class _PatientRevisionsNoDoctorState extends State<PatientRevisionsNoDoctor> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        GetBuilder<PatientStateController>(
-          builder: (_) => Container(
-            height: 116.0,
-            padding: const EdgeInsets.only(left: 20, right: 20, top: 16),
-            color: Colors.transparent,
-            child: Expanded(
-              child: Card(
-                  child: Center(
-                      child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Padding(
-                      padding: EdgeInsets.only(right: 8.0),
-                      child: Icon(
-                        Icons.info,
-                        color: Color(0xFFff6b6b),
-                        size: 32,
+    return Expanded(
+      child: Column(
+        children: [
+          GetBuilder<PatientStateController>(
+            builder: (_) => Container(
+              height: 116.0,
+              padding: const EdgeInsets.only(left: 20, right: 20, top: 16),
+              color: Colors.transparent,
+              child: Expanded(
+                child: Card(
+                    child: Center(
+                        child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Padding(
+                        padding: EdgeInsets.only(right: 8.0),
+                        child: Icon(
+                          Icons.info,
+                          color: Color(0xFFff6b6b),
+                          size: 32,
+                        ),
                       ),
-                    ),
-                    Text("No doctor found!",
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black)),
-                  ],
-                ),
-              ))),
+                      Text("No doctor found!",
+                          style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black)),
+                    ],
+                  ),
+                ))),
+              ),
             ),
           ),
-        ),
-        const Padding(
-          padding: EdgeInsets.only(top: 32.0),
-          child: Text("Request a doctor from below:",
-              style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black)),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(top: 10.0),
-          child: ListView.builder(
-              shrinkWrap: true,
-              scrollDirection: Axis.vertical,
-              itemCount: doctors.length,
-              itemBuilder: (BuildContext context, int index) {
-                var doctor = doctors[index];
-
-                return Column(
+          const Padding(
+            padding: EdgeInsets.only(top: 32.0),
+            child: Text("Request a doctor from below:",
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black)),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 10.0),
+              child: Expanded(
+                child: Column(
                   children: [
-                    ListTile(
-                      title: Text(doctor.name),
-                      leading: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: doctor.image),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          IconButton(
-                            padding: const EdgeInsets.all(6),
-                            constraints: const BoxConstraints(),
-                            color: Colors.green,
-                            icon: const Icon(Icons.schedule_send, size: 26),
-                            onPressed: doctor.id ==
-                                    patientState.patient!.request_doctor_id
-                                ? null
-                                : () {
-                                    requestDoctor(doctor.id);
-                                  },
+                    Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: TextField(
+                        controller: _searchController,
+                        decoration: InputDecoration(
+                          hintText: "Search for a doctor",
+                          prefixIcon: const Icon(Icons.search),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                          IconButton(
-                            padding: const EdgeInsets.all(6),
-                            constraints: const BoxConstraints(),
-                            color: Colors.red,
-                            icon: const Icon(Icons.cancel, size: 26),
-                            onPressed: doctor.id ==
-                                    patientState.patient!.request_doctor_id
-                                ? cancelDoctorRequest
-                                : null,
-                          ),
-                        ],
+                        ),
+                        onChanged: (txt) {
+                          setState(() {
+                            filteredDoctors = doctors
+                                .where((doctor) => doctor.name
+                                    .toLowerCase()
+                                    .contains(txt.toLowerCase()))
+                                .toList();
+                          });
+                        },
                       ),
                     ),
+                    Expanded(
+                      child: ListView.builder(
+                          shrinkWrap: true,
+                          scrollDirection: Axis.vertical,
+                          itemCount: filteredDoctors.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            var doctor = filteredDoctors[index];
 
-                    // if this is the last one, no need for divider
-                    if (doctor.id != doctors[doctors.length - 1].id)
-                      Divider(
-                          thickness: 2,
-                          height: 16,
-                          indent: 16,
-                          endIndent: 16,
-                          color: Colors.grey.withOpacity(0.22)),
+                            return Column(
+                              children: [
+                                ListTile(
+                                  title: Text(doctor.name),
+                                  leading: ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: doctor.image),
+                                  trailing: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: <Widget>[
+                                      IconButton(
+                                        padding: const EdgeInsets.all(6),
+                                        constraints: const BoxConstraints(),
+                                        color: Colors.green,
+                                        icon: const Icon(Icons.schedule_send,
+                                            size: 26),
+                                        onPressed: doctor.id ==
+                                                patientState
+                                                    .patient!.request_doctor_id
+                                            ? null
+                                            : () {
+                                                requestDoctor(doctor.id);
+                                              },
+                                      ),
+                                      IconButton(
+                                        padding: const EdgeInsets.all(6),
+                                        constraints: const BoxConstraints(),
+                                        color: Colors.red,
+                                        icon:
+                                            const Icon(Icons.cancel, size: 26),
+                                        onPressed: doctor.id ==
+                                                patientState
+                                                    .patient!.request_doctor_id
+                                            ? cancelDoctorRequest
+                                            : null,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                // if this is the last one, no need for divider
+                                if (doctor.id != doctors[doctors.length - 1].id)
+                                  Divider(
+                                      thickness: 2,
+                                      height: 16,
+                                      indent: 16,
+                                      endIndent: 16,
+                                      color: Colors.grey.withOpacity(0.22)),
+                              ],
+                            );
+                          }),
+                    ),
                   ],
-                );
-              }),
-        ),
-      ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
