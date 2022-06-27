@@ -170,12 +170,28 @@ class PatientRevisionsState extends State<PatientRevisions> {
                     ),
                   if (currentRevision != null)
                     ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            currentRevision = null;
-                          });
-                        },
-                        child: const Text("Back to revisions")),
+                      onPressed: () {
+                        setState(() {
+                          currentRevision = null;
+                        });
+                      },
+                      child: Container(
+                        width: 160,
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.arrow_back,
+                              color: Colors.black,
+                            ),
+                            const Text("Go back to revisions",
+                                style: TextStyle(color: Colors.black)),
+                          ],
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        primary: Colors.white,
+                      ),
+                    ),
                   if (currentRevision != null)
                     CurrentRevision(revision: currentRevision!)
                 ],
