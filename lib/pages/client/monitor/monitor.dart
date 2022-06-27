@@ -84,6 +84,8 @@ class _ClientMonitorState extends State<ClientMonitor> {
       return;
     }
 
+    ecgBufferState.reset();
+
     try {
       await clientConnection.tryConnection();
 
@@ -163,7 +165,6 @@ class _ClientMonitorState extends State<ClientMonitor> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: GetBuilder<ECGBufferController>(
-            init: ECGBufferController(),
             builder: (ecgBufferState) => ecgBufferState.get().isEmpty
                 ? const ClientMonitorDisconnectedECG()
                 : ClientMonitorECGConnected(user: widget.user)));

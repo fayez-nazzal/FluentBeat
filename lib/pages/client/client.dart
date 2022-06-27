@@ -2,6 +2,7 @@ import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
 import 'package:fluent_beat/pages/client/monitor/monitor.dart';
 import 'package:fluent_beat/pages/client/revisions/revisions.dart';
 import 'package:fluent_beat/pages/client/settings/settings.dart';
+import 'package:fluent_beat/pages/client/state/ecg_buffer.dart';
 import 'package:fluent_beat/pages/client/state/patient.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -39,6 +40,9 @@ class _ClientPageState extends State<ClientPage> {
 
   @override
   Widget build(BuildContext context) {
+    // add ecgBuffferState to global state
+    Get.put(ECGBufferController());
+
     return Scaffold(
       body: SafeArea(
         child: IndexedStack(
