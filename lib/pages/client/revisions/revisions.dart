@@ -154,7 +154,8 @@ class PatientRevisionsState extends State<PatientRevisions> {
                         scrollDirection: Axis.vertical,
                         itemCount: revisionsTiles.length,
                         itemBuilder: (BuildContext context, int index) {
-                          return revisionsTiles[index];
+                          return revisionsTiles[
+                              revisionsTiles.length - index - 1];
                         }),
                   ),
                 if (currentRevision != null)

@@ -27,8 +27,8 @@ class _CurrentRevisionState extends State<CurrentRevision> {
   }
 
   Future downloadImage() async {
-    File imageFile =
-        (await StorageRepository.getImage(widget.revision.getId(), "png"))!;
+    File imageFile = (await StorageRepository.getImage(
+        widget.revision.getId() + "_h", "png"))!;
 
     setState(() {
       imageProvider = FileImage(imageFile);
@@ -115,19 +115,14 @@ class _CurrentRevisionState extends State<CurrentRevision> {
                 ),
                 // show scrollable image
                 if (imageProvider != null)
-                  Container(
-                    color: Colors.white,
-                    child: SizedBox(
-                      height: 136,
-                      width: double.infinity,
-                      child: InteractiveViewer(
-                        child: Image(
-                          image: imageProvider!,
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                    ),
-                  ),
+                  SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: SizedBox(
+                          height: 136,
+                          child: Image(
+                            image: imageProvider!,
+                            fit: BoxFit.cover,
+                          ))),
                 // comments box ( input )
                 Container(
                   color: Color(0x3386AEAD),
