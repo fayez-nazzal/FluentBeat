@@ -51,7 +51,7 @@ class ClientDashboard extends StatelessWidget {
   List<ChartSeries<AverageBPMSummaryChartData, DateTime>> _getBPMBarSeries(
       PatientStateController patientState) {
     return <ChartSeries<AverageBPMSummaryChartData, DateTime>>[
-      BarSeries<AverageBPMSummaryChartData, DateTime>(
+      ColumnSeries<AverageBPMSummaryChartData, DateTime>(
           animationDuration: 2500,
           dataSource: patientState.avgBPMSummaryHeartData,
           xValueMapper: (AverageBPMSummaryChartData data, _) => data.date,
