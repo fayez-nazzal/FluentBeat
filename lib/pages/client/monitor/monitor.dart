@@ -180,7 +180,7 @@ class _ClientMonitorState extends State<ClientMonitor> {
         'data': normBuffer.sublist(0, 187),
         'user_id': widget.user.userId,
         'bpm': heartrate,
-        'date': DateFormat.yMd().format(DateTime.now())
+        'date': DateFormat("yyyy-MM-dd").format(DateTime.now())
       }),
     );
 
@@ -328,7 +328,8 @@ class _ClientMonitorState extends State<ClientMonitor> {
         time += 1;
 
         LiveData liveData = LiveData(time, normX);
-        appendData.add(liveData);
+
+        if (appendData.length < 10) appendData.add(liveData);
 
         // for bpm measurement
         bpmBuffer.add(normX);
@@ -354,7 +355,7 @@ class _ClientMonitorState extends State<ClientMonitor> {
 
   @override
   Widget build(BuildContext context) {
-    if (clientConnection.connection?.isConnected ?? true) {
+    if (clientConnection.connection?.isConnected == false) {
       return const ClientMonitorDisconnectedECG();
     }
 

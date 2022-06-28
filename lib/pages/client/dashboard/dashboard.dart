@@ -83,7 +83,7 @@ class ClientDashboard extends StatelessWidget {
             style: TextStyle(
                 fontSize: fontSize, fontWeight: fw, color: Colors.red));
       default:
-        return const Text('',
+        return const Text('~',
             style: TextStyle(
               fontSize: fontSize,
               fontWeight: fw,
@@ -180,7 +180,7 @@ class ClientDashboard extends StatelessWidget {
                                 const SizedBox(height: 8),
                                 Text(
                                   patientState.averageBPMThisWeek == 0
-                                      ? ""
+                                      ? "~"
                                       : patientState.averageBPMThisWeek
                                           .toString(),
                                   style: TextStyle(
@@ -211,90 +211,140 @@ class ClientDashboard extends StatelessWidget {
                           child: SingleChildScrollView(
                             scrollDirection: Axis.vertical,
                             controller: _scrollController,
-                            child: Column(children: [
-                              SizedBox(
-                                child: Card(
-                                  child: Column(
-                                    children: [
-                                      const SizedBox(
-                                        height: 6,
+                            child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  SizedBox(
+                                    height: 320,
+                                    width: double.infinity,
+                                    child: Card(
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          const SizedBox(
+                                            height: 6,
+                                          ),
+                                          Padding(
+                                              padding:
+                                                  const EdgeInsets.all(2.0),
+                                              child: patientState
+                                                          .winnerClassThisWeek ==
+                                                      -1
+                                                  ? const Text("No Data",
+                                                      style: TextStyle(
+                                                          fontSize: 32,
+                                                          fontWeight:
+                                                              FontWeight.w500,
+                                                          color:
+                                                              Colors.black26))
+                                                  : SfCartesianChart(
+                                                      plotAreaBorderWidth: 0,
+                                                      title: ChartTitle(
+                                                          text: patientState
+                                                                  .predictionsSummaryChartData
+                                                                  .isEmpty
+                                                              ? ''
+                                                              : 'Predictions Summary'),
+                                                      legend: Legend(
+                                                          isVisible: patientState
+                                                              .predictionsSummaryChartData
+                                                              .isNotEmpty,
+                                                          position:
+                                                              LegendPosition
+                                                                  .bottom,
+                                                          overflowMode:
+                                                              LegendItemOverflowMode
+                                                                  .wrap),
+                                                      primaryXAxis: DateTimeAxis(
+                                                          majorGridLines:
+                                                              const MajorGridLines(
+                                                                  width: 0),
+                                                          intervalType:
+                                                              DateTimeIntervalType
+                                                                  .days,
+                                                          dateFormat:
+                                                              DateFormat.yMd()),
+                                                      primaryYAxis:
+                                                          NumericAxis(),
+                                                      series:
+                                                          _getStackedAreaSeries(
+                                                              patientState),
+                                                      tooltipBehavior:
+                                                          _tooltipBehavior,
+                                                    )),
+                                        ],
                                       ),
-                                      Padding(
-                                          padding: const EdgeInsets.all(2.0),
-                                          child: SfCartesianChart(
-                                            plotAreaBorderWidth: 0,
-                                            title: ChartTitle(
-                                                text: patientState
-                                                        .predictionsSummaryChartData
-                                                        .isEmpty
-                                                    ? ''
-                                                    : 'Predictions Summary'),
-                                            legend: Legend(
-                                                isVisible: patientState
-                                                    .predictionsSummaryChartData
-                                                    .isNotEmpty,
-                                                position: LegendPosition.bottom,
-                                                overflowMode:
-                                                    LegendItemOverflowMode
-                                                        .wrap),
-                                            primaryXAxis: DateTimeAxis(
-                                                majorGridLines:
-                                                    const MajorGridLines(
-                                                        width: 0),
-                                                intervalType:
-                                                    DateTimeIntervalType.days,
-                                                dateFormat: DateFormat.yMd()),
-                                            primaryYAxis: NumericAxis(),
-                                            series: _getStackedAreaSeries(
-                                                patientState),
-                                            tooltipBehavior: _tooltipBehavior,
-                                          )),
-                                    ],
+                                    ),
                                   ),
-                                ),
-                              ),
-                              SizedBox(
-                                child: Card(
-                                  child: Column(
-                                    children: [
-                                      const SizedBox(
-                                        height: 6,
+                                  SizedBox(
+                                    height: 340,
+                                    width: double.infinity,
+                                    child: Card(
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          const SizedBox(
+                                            height: 6,
+                                          ),
+                                          Padding(
+                                              padding:
+                                                  const EdgeInsets.all(2.0),
+                                              child: patientState
+                                                          .averageBPMThisWeek ==
+                                                      0
+                                                  ? const Text("No Data",
+                                                      style: TextStyle(
+                                                          fontSize: 32,
+                                                          fontWeight:
+                                                              FontWeight.w500,
+                                                          color:
+                                                              Colors.black26))
+                                                  : SfCartesianChart(
+                                                      plotAreaBorderWidth: 0,
+                                                      title: ChartTitle(
+                                                          text: patientState
+                                                                  .predictionsSummaryChartData
+                                                                  .isEmpty
+                                                              ? ''
+                                                              : 'Average BPM Summary'),
+                                                      legend: Legend(
+                                                          isVisible: patientState
+                                                              .predictionsSummaryChartData
+                                                              .isNotEmpty,
+                                                          position:
+                                                              LegendPosition
+                                                                  .bottom,
+                                                          overflowMode:
+                                                              LegendItemOverflowMode
+                                                                  .wrap),
+                                                      primaryXAxis: DateTimeAxis(
+                                                          majorGridLines:
+                                                              const MajorGridLines(
+                                                                  width: 0),
+                                                          intervalType:
+                                                              DateTimeIntervalType
+                                                                  .days,
+                                                          dateFormat:
+                                                              DateFormat.yMd()),
+                                                      primaryYAxis:
+                                                          NumericAxis(),
+                                                      series: _getBPMBarSeries(
+                                                          patientState),
+                                                      tooltipBehavior:
+                                                          _tooltipBehavior,
+                                                    )),
+                                        ],
                                       ),
-                                      Padding(
-                                          padding: const EdgeInsets.all(2.0),
-                                          child: SfCartesianChart(
-                                            plotAreaBorderWidth: 0,
-                                            title: ChartTitle(
-                                                text: patientState
-                                                        .predictionsSummaryChartData
-                                                        .isEmpty
-                                                    ? ''
-                                                    : 'Average BPM Summary'),
-                                            legend: Legend(
-                                                isVisible: patientState
-                                                    .predictionsSummaryChartData
-                                                    .isNotEmpty,
-                                                position: LegendPosition.bottom,
-                                                overflowMode:
-                                                    LegendItemOverflowMode
-                                                        .wrap),
-                                            primaryXAxis: DateTimeAxis(
-                                                majorGridLines:
-                                                    const MajorGridLines(
-                                                        width: 0),
-                                                intervalType:
-                                                    DateTimeIntervalType.days,
-                                                dateFormat: DateFormat.yMd()),
-                                            primaryYAxis: NumericAxis(),
-                                            series:
-                                                _getBPMBarSeries(patientState),
-                                            tooltipBehavior: _tooltipBehavior,
-                                          )),
-                                    ],
+                                    ),
                                   ),
-                                ),
-                              ),
-                            ]),
+                                ]),
                           ),
                         )),
                   ),
