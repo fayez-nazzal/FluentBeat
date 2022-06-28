@@ -110,11 +110,21 @@ class PatientStateController extends GetxController {
           date: date, heartRate: statItem['bpm_sum'] / statItem['bpm_count']));
     }
 
-    // get the most frequent class
-    winnerClassThisWeek = classCounts.reduce(max);
+    // check if all classCounts are zero
+    if (classCounts.every((element) => element == 0)) {
+      winnerClassThisWeek = -1;
+    } else {
+      num maxClass = classCounts.reduce(max);
 
-    averageBPMThisWeek = bpmAvgSum ~/ bpmAvgCount;
+      winnerClassThisWeek = classCounts.indexOf(maxClass);
+    }
 
+    // check if bpmAvgSum is zero
+    if (bpmAvgSum == 0) {
+      averageBPMThisWeek = 0;
+    } else {
+      averageBPMThisWeek = bpmAvgSum ~/ bpmAvgCount;
+    }
     update();
   }
 }
