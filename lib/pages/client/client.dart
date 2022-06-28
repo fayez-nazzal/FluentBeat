@@ -30,7 +30,7 @@ class _ClientPageState extends State<ClientPage> {
     patientState.getInfo();
 
     screens = [
-      const ClientDashboard(),
+      ClientDashboard(),
       ClientMonitor(user: widget.user),
       const PatientRevisions(),
       const Settings(),
