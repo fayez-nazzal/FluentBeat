@@ -57,7 +57,7 @@ class ClientDashboard extends StatelessWidget {
           xValueMapper: (AverageBPMSummaryChartData data, _) => data.date,
           yValueMapper: (AverageBPMSummaryChartData data, _) => data.heartRate,
           color: const Color(0xFFff6b6b),
-          name: 'Average BPM'),
+          name: 'Average Heart Rate'),
     ];
   }
 
@@ -131,76 +131,7 @@ class ClientDashboard extends StatelessWidget {
                   ),
                 ),
                 // metrics
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: SizedBox(
-                    height: 88.0,
-                    width: double.infinity,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      shrinkWrap: true,
-                      children: [
-                        SizedBox(
-                          width: 230,
-                          child: Card(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              // title
-                              children: [
-                                const Text(
-                                  'Predicted Class',
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.black87),
-                                ),
-                                const SizedBox(height: 8),
-                                _getWinnerClassText(
-                                  patientState,
-                                )
-                              ],
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          width: 150,
-                          child: Card(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                const Text(
-                                  'Average BPM',
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.black87),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  patientState.averageBPMThisWeek == 0
-                                      ? "~"
-                                      : patientState.averageBPMThisWeek
-                                          .toString(),
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                      color: (patientState.averageBPMThisWeek <
-                                                  70 ||
-                                              patientState.averageBPMThisWeek >
-                                                  120)
-                                          ? Colors.red
-                                          : Colors.green),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+
                 Expanded(
                   child: Container(
                     child: Scrollbar(
@@ -215,6 +146,87 @@ class ClientDashboard extends StatelessWidget {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: SizedBox(
+                                      width: double.infinity,
+                                      height: 80,
+                                      child: Card(
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          // title
+                                          children: [
+                                            const Text(
+                                              'Most Frequent Class This week',
+                                              style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: Colors.black87),
+                                            ),
+                                            const SizedBox(height: 8),
+                                            _getWinnerClassText(
+                                              patientState,
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: SizedBox(
+                                      width: double.infinity,
+                                      height: 80,
+                                      child: Card(
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            const Text(
+                                              'Average Heart Rate This Week',
+                                              style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: Colors.black87),
+                                            ),
+                                            const SizedBox(height: 8),
+                                            Text(
+                                              patientState.averageBPMThisWeek ==
+                                                      0
+                                                  ? "~"
+                                                  : patientState
+                                                      .averageBPMThisWeek
+                                                      .toString(),
+                                              style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: (patientState
+                                                                  .averageBPMThisWeek <
+                                                              70 ||
+                                                          patientState
+                                                                  .averageBPMThisWeek >
+                                                              120)
+                                                      ? Colors.red
+                                                      : Colors.green),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const Text("This Week Predictions ",
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500,
+                                          color: Colors.black87)),
+                                  const SizedBox(
+                                    height: 6,
+                                  ),
                                   SizedBox(
                                     height: 320,
                                     width: double.infinity,
@@ -232,50 +244,59 @@ class ClientDashboard extends StatelessWidget {
                                               padding:
                                                   const EdgeInsets.all(2.0),
                                               child: patientState
-                                                          .winnerClassThisWeek ==
-                                                      -1
+                                                      .predictionsSummaryChartData
+                                                      .isEmpty
                                                   ? const Text("No Data",
                                                       style: TextStyle(
-                                                          fontSize: 32,
+                                                          fontSize: 28,
                                                           fontWeight:
                                                               FontWeight.w500,
                                                           color:
                                                               Colors.black26))
-                                                  : SfCartesianChart(
-                                                      plotAreaBorderWidth: 0,
-                                                      title: ChartTitle(
-                                                          text: patientState
-                                                                  .predictionsSummaryChartData
-                                                                  .isEmpty
-                                                              ? ''
-                                                              : 'Predictions Summary'),
-                                                      legend: Legend(
-                                                          isVisible: patientState
+                                                  : patientState
                                                               .predictionsSummaryChartData
-                                                              .isNotEmpty,
-                                                          position:
-                                                              LegendPosition
-                                                                  .bottom,
-                                                          overflowMode:
-                                                              LegendItemOverflowMode
-                                                                  .wrap),
-                                                      primaryXAxis: DateTimeAxis(
-                                                          majorGridLines:
-                                                              const MajorGridLines(
-                                                                  width: 0),
-                                                          intervalType:
-                                                              DateTimeIntervalType
-                                                                  .days,
-                                                          dateFormat:
-                                                              DateFormat.yMd()),
-                                                      primaryYAxis:
-                                                          NumericAxis(),
-                                                      series:
-                                                          _getStackedAreaSeries(
-                                                              patientState),
-                                                      tooltipBehavior:
-                                                          _tooltipBehavior,
-                                                    )),
+                                                              .length ==
+                                                          1
+                                                      ? const Text(
+                                                          "Needs 2 days at least",
+                                                          style: TextStyle(
+                                                              fontSize: 28,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w500,
+                                                              color: Colors
+                                                                  .black26))
+                                                      : SfCartesianChart(
+                                                          plotAreaBorderWidth:
+                                                              0,
+                                                          legend: Legend(
+                                                              isVisible: patientState
+                                                                  .predictionsSummaryChartData
+                                                                  .isNotEmpty,
+                                                              position:
+                                                                  LegendPosition
+                                                                      .bottom,
+                                                              overflowMode:
+                                                                  LegendItemOverflowMode
+                                                                      .wrap),
+                                                          primaryXAxis: DateTimeAxis(
+                                                              majorGridLines:
+                                                                  const MajorGridLines(
+                                                                      width: 0),
+                                                              intervalType:
+                                                                  DateTimeIntervalType
+                                                                      .days,
+                                                              dateFormat:
+                                                                  DateFormat
+                                                                      .yMd()),
+                                                          primaryYAxis:
+                                                              NumericAxis(),
+                                                          series:
+                                                              _getStackedAreaSeries(
+                                                                  patientState),
+                                                          tooltipBehavior:
+                                                              _tooltipBehavior,
+                                                        )),
                                         ],
                                       ),
                                     ),
@@ -290,6 +311,11 @@ class ClientDashboard extends StatelessWidget {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.center,
                                         children: [
+                                          const Text("This Week BPM ",
+                                              style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: Colors.black87)),
                                           const SizedBox(
                                             height: 6,
                                           ),
@@ -301,19 +327,13 @@ class ClientDashboard extends StatelessWidget {
                                                       0
                                                   ? const Text("No Data",
                                                       style: TextStyle(
-                                                          fontSize: 32,
+                                                          fontSize: 28,
                                                           fontWeight:
                                                               FontWeight.w500,
                                                           color:
                                                               Colors.black26))
                                                   : SfCartesianChart(
                                                       plotAreaBorderWidth: 0,
-                                                      title: ChartTitle(
-                                                          text: patientState
-                                                                  .predictionsSummaryChartData
-                                                                  .isEmpty
-                                                              ? ''
-                                                              : 'Average BPM Summary'),
                                                       legend: Legend(
                                                           isVisible: patientState
                                                               .predictionsSummaryChartData

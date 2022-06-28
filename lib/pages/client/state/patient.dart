@@ -127,6 +127,7 @@ class PatientStateController extends GetxController {
     } else {
       averageBPMThisWeek = bpmAvgSum ~/ bpmAvgCount;
     }
+
     update();
   }
 
