@@ -131,10 +131,12 @@ class PatientStateController extends GetxController {
   }
 
   void updateWinnerClass(int classIndex) {
+    if (classIndex == -1) return;
+
     classCountsToday[classIndex]++;
     classCountsThisWeek[classIndex]++;
 
-    int updateWinner(var winner, var classCounts) {
+    int updateWinner(int winner, List<num> classCounts) {
       if (winner == -1) {
         winner = classIndex;
       } else {

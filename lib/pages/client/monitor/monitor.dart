@@ -40,6 +40,9 @@ class _ClientMonitorState extends State<ClientMonitor> {
   double normBufferMax = -1;
   int samplesPassed = 0;
   bool isPredictionEmergency = false;
+  bool improperConnection = false;
+  double normBufferAverage = 0;
+  bool isMoving = true;
 
   // samples will be sent every ( 1.5 * this variable  ) seconds
   final int sampleDelayMultiplier = 1;
@@ -168,6 +171,30 @@ class _ClientMonitorState extends State<ClientMonitor> {
   }
 
   void _updateBPM(Timer timer) {
+    if (normBuffer.length >= 187) {
+      setState(() {
+        normBufferAverage =
+            normBuffer.reduce((value, element) => value + element) /
+                normBuffer.length;
+      });
+
+      if (normBufferAverage > 0.4 || normBufferAverage < 0.18) {
+        improperConnection = true;
+        normBuffer = [];
+
+        setState(() {});
+      } else {
+        improperConnection = false;
+
+        setState(() {});
+      }
+    }
+
+    if (improperConnection) {
+      heartrate = 0;
+      return;
+    }
+
     int bpm = 0;
     double bpmBufferMax = -1;
 
@@ -208,10 +235,12 @@ class _ClientMonitorState extends State<ClientMonitor> {
 
   void _attemptPredict(Timer timer) async {
     if (normBuffer.length < 187) return;
+
+    // if there is improper connection, return
+    if (improperConnection) return;
+
     if (heartrate < 20) return;
     if (callingReq) return;
-
-    print("attempt predict");
 
     callingReq = true;
 
@@ -224,14 +253,26 @@ class _ClientMonitorState extends State<ClientMonitor> {
         'data': normBuffer.sublist(0, 187),
         'user_id': widget.user.userId,
         'bpm': heartrate,
-        'date': DateFormat("yyyy-MM-dd").format(DateTime.now())
+        'date': DateFormat("yyyy-MM-dd").format(DateTime.now()),
+        'is_moving': isMoving,
+        'avg_norm_buffer': normBufferAverage,
+        'should_save_ecg':
+            isPredictionEmergency || heartrate > 120 || heartrate < 70,
       }),
     );
 
     normBuffer = [];
 
     if (response.statusCode == 200) {
-      patientState.updateWinnerClass(int.parse(response.body));
+      int predictedClass = -1;
+
+      try {
+        predictedClass = int.parse(response.body);
+      } catch (e) {
+        // nothing
+      }
+
+      patientState.updateWinnerClass(predictedClass);
     } else {}
 
     callingReq = false;
@@ -321,7 +362,13 @@ class _ClientMonitorState extends State<ClientMonitor> {
           bufferStr.startsWith("E")) {
         String data = bufferStr.substring(1, bufferStr.length - 1);
 
-        int x = int.parse(data);
+        int x;
+
+        try {
+          x = int.parse(data);
+        } catch (e) {
+          continue;
+        }
 
         // make sure it is not clapped
         x = x < xMin ? xMin : x;
@@ -354,7 +401,7 @@ class _ClientMonitorState extends State<ClientMonitor> {
       }
 
       // in case wrong thing happens
-      bufferStr.replaceAll("EE", "E");
+      bufferStr = bufferStr.replaceAll("EEE", "E").replaceAll("EE", "E");
     }
   }
 
@@ -406,37 +453,52 @@ class _ClientMonitorState extends State<ClientMonitor> {
                 const Text("ECG Signal",
                     style:
                         TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                Padding(
-                  padding: const EdgeInsets.only(left: 4.0, right: 8),
-                  child: chartData.isEmpty
-                      ? Container()
-                      : SfCartesianChart(
-                          plotAreaBackgroundColor: isRecording
-                              ? const Color(0x33CAD7D7)
-                              : const Color(0xaafafafa),
-                          series: [
-                            FastLineSeries<LiveData, int>(
-                                color: const Color(0xff52A1BC),
-                                onRendererCreated:
-                                    (ChartSeriesController controller) {
-                                  // Assigning the controller to the _chartSeriesController.
-                                  _chartSeriesController = controller;
-                                },
-                                // Binding the chartData to the dataSource of the line series.
-                                dataSource: chartData,
-                                xValueMapper: (LiveData liveData, _) =>
-                                    liveData.x,
-                                yValueMapper: (LiveData liveData, _) =>
-                                    liveData.y,
-                                animationDuration: 8),
-                          ],
-                          enableAxisAnimation: true,
-                          primaryYAxis: NumericAxis(
-                            minimum: 0.000,
-                            maximum: 1.000,
-                          ),
-                          primaryXAxis: NumericAxis(isVisible: false),
-                        ),
+                SizedBox(
+                  height: 325,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 4.0, right: 8),
+                    child: chartData.isEmpty
+                        ? Container()
+                        : improperConnection
+                            ? Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: const [
+                                  Text(
+                                      "Improper connection or movement detected",
+                                      style: TextStyle(
+                                          color: Colors.red, fontSize: 15)),
+                                  Text("We are not performing any predictions",
+                                      style: TextStyle(color: Colors.black87)),
+                                ],
+                              )
+                            : SfCartesianChart(
+                                plotAreaBackgroundColor: isRecording
+                                    ? const Color(0x33CAD7D7)
+                                    : const Color(0xaafafafa),
+                                series: [
+                                  FastLineSeries<LiveData, int>(
+                                      color: const Color(0xff52A1BC),
+                                      onRendererCreated:
+                                          (ChartSeriesController controller) {
+                                        // Assigning the controller to the _chartSeriesController.
+                                        _chartSeriesController = controller;
+                                      },
+                                      // Binding the chartData to the dataSource of the line series.
+                                      dataSource: chartData,
+                                      xValueMapper: (LiveData liveData, _) =>
+                                          liveData.x,
+                                      yValueMapper: (LiveData liveData, _) =>
+                                          liveData.y,
+                                      animationDuration: 8),
+                                ],
+                                enableAxisAnimation: true,
+                                primaryYAxis: NumericAxis(
+                                  minimum: 0.000,
+                                  maximum: 1.000,
+                                ),
+                                primaryXAxis: NumericAxis(isVisible: false),
+                              ),
+                  ),
                 ),
               ],
             ),
@@ -491,6 +553,14 @@ class _ClientMonitorState extends State<ClientMonitor> {
               ),
             ),
           ),
+          Text(normBufferAverage.toString()),
+          ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  isMoving = !isMoving;
+                });
+              },
+              child: Text(isMoving.toString())),
           ElevatedButton(
               child: Text(
                   isRecording
