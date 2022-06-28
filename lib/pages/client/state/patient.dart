@@ -15,7 +15,10 @@ class PatientStateController extends GetxController {
   List<PredictionsSummaryChartData> predictionsSummaryChartData = [];
   List<AverageBPMSummaryChartData> avgBPMSummaryHeartData = [];
   int averageBPMThisWeek = 0;
-  num winnerClassThisWeek = -1;
+  int winnerClassThisWeek = -1;
+  int winnerClassToday = -1;
+  List<num> classCountsThisWeek = [0, 0, 0, 0];
+  List<num> classCountsToday = [0, 0, 0, 0];
 
   Future getInfo() async {
     String patientCognitoId = (await Amplify.Auth.getCurrentUser()).userId;
@@ -60,7 +63,6 @@ class PatientStateController extends GetxController {
     // average of ( average bpm across week )
     double bpmAvgSum = 0;
     int bpmAvgCount = 0;
-    List<num> classCounts = [0, 0, 0, 0];
 
     for (var statItem in decodedResponse) {
       DateTime date = DateTime.parse(statItem['date']);
@@ -99,10 +101,10 @@ class PatientStateController extends GetxController {
         date: date,
       );
 
-      classCounts[0] += statItem['class_0'];
-      classCounts[1] += statItem['class_1'];
-      classCounts[2] += statItem['class_2'];
-      classCounts[3] += statItem['class_3'];
+      classCountsThisWeek[0] += statItem['class_0'];
+      classCountsThisWeek[1] += statItem['class_1'];
+      classCountsThisWeek[2] += statItem['class_2'];
+      classCountsThisWeek[3] += statItem['class_3'];
 
       predictionsSummaryChartData.add(statPredictionsSummary);
 
@@ -111,12 +113,12 @@ class PatientStateController extends GetxController {
     }
 
     // check if all classCounts are zero
-    if (classCounts.every((element) => element == 0)) {
+    if (classCountsThisWeek.every((element) => element == 0)) {
       winnerClassThisWeek = -1;
     } else {
-      num maxClass = classCounts.reduce(max);
+      num maxClass = classCountsThisWeek.reduce(max);
 
-      winnerClassThisWeek = classCounts.indexOf(maxClass);
+      winnerClassThisWeek = classCountsThisWeek.indexOf(maxClass);
     }
 
     // check if bpmAvgSum is zero
@@ -125,6 +127,30 @@ class PatientStateController extends GetxController {
     } else {
       averageBPMThisWeek = bpmAvgSum ~/ bpmAvgCount;
     }
+    update();
+  }
+
+  void updateWinnerClass(int classIndex) {
+    classCountsToday[classIndex]++;
+    classCountsThisWeek[classIndex]++;
+
+    int updateWinner(var winner, var classCounts) {
+      if (winner == -1) {
+        winner = classIndex;
+      } else {
+        num maxClass = classCounts.reduce(max);
+
+        winner = classCounts.indexOf(maxClass);
+      }
+
+      return winner;
+    }
+
+    winnerClassToday = updateWinner(winnerClassToday, classCountsToday);
+
+    winnerClassThisWeek =
+        updateWinner(winnerClassThisWeek, classCountsThisWeek);
+
     update();
   }
 }

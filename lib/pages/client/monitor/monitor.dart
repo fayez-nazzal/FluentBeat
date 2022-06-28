@@ -39,6 +39,7 @@ class _ClientMonitorState extends State<ClientMonitor> {
   Timer? sampleTimer;
   double normBufferMax = -1;
   int samplesPassed = 0;
+  bool isPredictionEmergency = false;
 
   // samples will be sent every ( 1.5 * this variable  ) seconds
   final int sampleDelayMultiplier = 1;
@@ -59,9 +60,6 @@ class _ClientMonitorState extends State<ClientMonitor> {
 
   Timer? bpmTimer;
 
-  int winnerClass = 0;
-  String warning = "";
-
   List<String> predictionText = <String>[
     "Normal ECG",
     "Supraventricular Arrhythmia",
@@ -81,7 +79,7 @@ class _ClientMonitorState extends State<ClientMonitor> {
         "No high Risk Factor, just keep wearing the ECG device for safety.",
     "risk-emergency-high-bpm": "And your BPM is high, we notified your doctor.",
     "risk-emergency-low-bpm": "And your BPM is low, we notified your doctor.",
-    "risk-emergency-high":
+    "risk-emergency-high-prediction":
         "We notified your doctor, be careful and wait for support.",
   };
 
@@ -94,8 +92,31 @@ class _ClientMonitorState extends State<ClientMonitor> {
 
   static PatientStateController get patientState => Get.find();
 
+  @override
+  void initState() {
+    super.initState();
+
+    setState(() {
+      for (int i = 0; i < chartLimit; i++) {
+        chartData.add(LiveData(i, 0));
+      }
+    });
+
+    time = chartData.length;
+
+    _attemptConnect(null);
+    Timer.periodic(const Duration(seconds: 12), _attemptConnect);
+
+    bpmTimer = Timer.periodic(const Duration(seconds: 1), _updateBPM);
+    sampleTimer = Timer.periodic(const Duration(seconds: 5), _attemptPredict);
+  }
+
   void _updatePredictionText() {
+    int winnerClass = patientState.winnerClassThisWeek;
     predictionCardStatus["title"] = predictionText[winnerClass];
+
+    bool abnormalWinner = patientState.winnerClassToday != 0 &&
+        patientState.classCountsToday[patientState.winnerClassToday] > 12;
 
     // Change prediction title only when winnerClass is 0 and BPM is abnormal
     if (winnerClass == 0 && heartrate < 70) {
@@ -112,15 +133,38 @@ class _ClientMonitorState extends State<ClientMonitor> {
       predictionCardStatus["body"] = bodyText["no-risk"];
       predictionCardStatus["icon"] = Icons.sentiment_very_satisfied;
       predictionCardStatus["color"] = Colors.green;
-    } else if (heartrate < 70) {
+    } else if (heartrate < 70 && abnormalWinner) {
       predictionCardStatus["body"] = bodyText["risk-emergency-low-bpm"];
       predictionCardStatus["icon"] = Icons.sentiment_very_dissatisfied;
       predictionCardStatus["color"] = Colors.red;
-    } else if (heartrate > 120) {
+    } else if (heartrate > 120 && abnormalWinner) {
       predictionCardStatus["body"] = bodyText["risk-emergency-high-bpm"];
       predictionCardStatus["icon"] = Icons.sentiment_very_dissatisfied;
       predictionCardStatus["color"] = Colors.red;
+    } else if (!isPredictionEmergency) {
+      predictionCardStatus["body"] = bodyText["no-high-risk"];
+      predictionCardStatus["icon"] = Icons.sentiment_dissatisfied;
+      predictionCardStatus["color"] = Colors.orange;
+    } else {
+      predictionCardStatus["body"] = bodyText["risk-emergency-high-prediction"];
+      predictionCardStatus["icon"] = Icons.sentiment_very_dissatisfied;
+      predictionCardStatus["color"] = Colors.red;
     }
+  }
+
+  void _checkEmergency(Timer timer) {
+    // if the winnerClass is not zero and count is more than 12*5 ( equivelent to last 5 minutes ) -- low emergency ( simple push notification )
+    if (patientState.winnerClassToday != 0 &&
+        patientState.classCountsToday[patientState.winnerClassToday] > 12 * 5) {
+      isPredictionEmergency = true;
+    } else {
+      isPredictionEmergency = false;
+    }
+
+    // if the winnerClass is not zero, count is more than 12*2 and BPM is high or low, make push notification emergency ( may be the 2nd in case of prediction emergency )
+    if (patientState.winnerClassToday != 0 &&
+        patientState.classCountsToday[patientState.winnerClassToday] > 12 * 2 &&
+        (heartrate < 70 || heartrate > 120)) {}
   }
 
   void _updateBPM(Timer timer) {
@@ -187,28 +231,8 @@ class _ClientMonitorState extends State<ClientMonitor> {
     normBuffer = [];
 
     if (response.statusCode == 200) {
-      if (predictions.containsKey(response.body)) {
-        predictions.update(response.body, (value) => value + 1);
-      } else {
-        predictions[response.body] = 1;
-      }
+      patientState.updateWinnerClass(int.parse(response.body));
     } else {}
-
-    int maxValue = -1;
-    String maxKey = "";
-
-    predictions.forEach((key, value) {
-      if (value > maxValue) {
-        maxValue = value;
-        maxKey = key;
-      }
-    });
-
-    setState(() {
-      winnerClass = int.parse(maxKey);
-
-      _updatePredictionText();
-    });
 
     callingReq = false;
   }
@@ -255,25 +279,6 @@ class _ClientMonitorState extends State<ClientMonitor> {
       addedDataIndex: chartData.length - 1,
       removedDataIndex: 0,
     );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    setState(() {
-      for (int i = 0; i < chartLimit; i++) {
-        chartData.add(LiveData(i, 0));
-      }
-    });
-
-    time = chartData.length;
-
-    _attemptConnect(null);
-    Timer.periodic(const Duration(seconds: 12), _attemptConnect);
-
-    bpmTimer = Timer.periodic(const Duration(seconds: 1), _updateBPM);
-    sampleTimer = Timer.periodic(const Duration(seconds: 8), _attemptPredict);
   }
 
   void _attemptConnect(Timer? timer) async {
