@@ -87,10 +87,10 @@ class _ClientMonitorState extends State<ClientMonitor> {
   };
 
   Map<String, dynamic> predictionCardStatus = {
-    "title": "Normal ECG",
-    "body": "No Risk detected, be committed to your revisions for safety.",
-    "icon": Icons.sentiment_very_satisfied,
-    "color": Colors.green,
+    "title": "No Prediction Yet",
+    "body": "Your current ECG data is not enough.",
+    "icon": Icons.sentiment_neutral,
+    "color": const Color(0xFFff6b6b),
   };
 
   static PatientStateController get patientState => Get.find();
@@ -116,12 +116,10 @@ class _ClientMonitorState extends State<ClientMonitor> {
 
   void _updatePredictionText() {
     int winnerClass = patientState.winnerClassThisWeek;
-    predictionCardStatus["title"] = predictionText[winnerClass];
 
-    bool abnormalWinner = patientState.winnerClassToday != 0 &&
+    bool abnormalWinner = patientState.winnerClassToday > 0 &&
         patientState.classCountsToday[patientState.winnerClassToday] > 12;
 
-    // Change prediction title only when winnerClass is 0 and BPM is abnormal
     if (winnerClass == 0 && heartrate < 70) {
       predictionCardStatus["title"] = abnormalBPMText["low-bpm"];
       predictionCardStatus["body"] = bodyText["no-risk-bpm"];
@@ -133,22 +131,27 @@ class _ClientMonitorState extends State<ClientMonitor> {
       predictionCardStatus["icon"] = Icons.sentiment_dissatisfied;
       predictionCardStatus["color"] = Colors.orange;
     } else if (winnerClass == 0) {
+      predictionCardStatus["title"] = predictionText[0];
       predictionCardStatus["body"] = bodyText["no-risk"];
       predictionCardStatus["icon"] = Icons.sentiment_very_satisfied;
       predictionCardStatus["color"] = Colors.green;
     } else if (heartrate < 70 && abnormalWinner) {
+      predictionCardStatus["title"] = predictionText[winnerClass];
       predictionCardStatus["body"] = bodyText["risk-emergency-low-bpm"];
       predictionCardStatus["icon"] = Icons.sentiment_very_dissatisfied;
       predictionCardStatus["color"] = Colors.red;
     } else if (heartrate > 120 && abnormalWinner) {
+      predictionCardStatus["title"] = predictionText[winnerClass];
       predictionCardStatus["body"] = bodyText["risk-emergency-high-bpm"];
       predictionCardStatus["icon"] = Icons.sentiment_very_dissatisfied;
       predictionCardStatus["color"] = Colors.red;
     } else if (!isPredictionEmergency) {
+      predictionCardStatus["title"] = predictionText[winnerClass];
       predictionCardStatus["body"] = bodyText["no-high-risk"];
       predictionCardStatus["icon"] = Icons.sentiment_dissatisfied;
       predictionCardStatus["color"] = Colors.orange;
     } else {
+      predictionCardStatus["title"] = predictionText[winnerClass];
       predictionCardStatus["body"] = bodyText["risk-emergency-high-prediction"];
       predictionCardStatus["icon"] = Icons.sentiment_very_dissatisfied;
       predictionCardStatus["color"] = Colors.red;
@@ -553,14 +556,6 @@ class _ClientMonitorState extends State<ClientMonitor> {
               ),
             ),
           ),
-          Text(normBufferAverage.toString()),
-          ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  isMoving = !isMoving;
-                });
-              },
-              child: Text(isMoving.toString())),
           ElevatedButton(
               child: Text(
                   isRecording

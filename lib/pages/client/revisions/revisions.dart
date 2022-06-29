@@ -122,7 +122,7 @@ class PatientRevisionsState extends State<PatientRevisions> {
                             const SizedBox(height: 4),
                             Text("  ${patientState.patient!.doctor!.name}",
                                 style: const TextStyle(
-                                    fontSize: 21,
+                                    fontSize: 16,
                                     fontWeight: FontWeight.w700,
                                     color: Colors.black87)),
                           ],
@@ -166,9 +166,7 @@ class PatientRevisionsState extends State<PatientRevisions> {
                       }),
                 ),
               ),
-            if (currentRevision == null &&
-                patientState.patient != null &&
-                patientState.patient!.doctor != null)
+            if (currentRevision != null)
               ElevatedButton(
                 onPressed: () {
                   setState(() {

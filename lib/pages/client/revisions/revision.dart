@@ -207,7 +207,9 @@ class _CurrentRevisionState extends State<CurrentRevision> {
                                 width: double.infinity,
                                 child: Row(
                                   children: [
-                                    Expanded(
+                                    SizedBox(
+                                      width: MediaQuery.of(context).size.width *
+                                          0.8,
                                       child: TextField(
                                         controller: commentField,
                                         decoration: const InputDecoration(
