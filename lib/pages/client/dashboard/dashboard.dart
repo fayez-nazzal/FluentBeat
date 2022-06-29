@@ -228,9 +228,9 @@ class ClientDashboard extends StatelessWidget {
                                     height: 6,
                                   ),
                                   SizedBox(
-                                    height: 320,
+                                    height: 380,
                                     width: double.infinity,
-                                    child: Card(
+                                    child: Expanded(
                                       child: Column(
                                         mainAxisAlignment:
                                             MainAxisAlignment.center,
@@ -240,63 +240,68 @@ class ClientDashboard extends StatelessWidget {
                                           const SizedBox(
                                             height: 6,
                                           ),
-                                          Padding(
-                                              padding:
-                                                  const EdgeInsets.all(2.0),
-                                              child: patientState
-                                                      .predictionsSummaryChartData
-                                                      .isEmpty
-                                                  ? const Text("No Data",
-                                                      style: TextStyle(
-                                                          fontSize: 28,
-                                                          fontWeight:
-                                                              FontWeight.w500,
-                                                          color:
-                                                              Colors.black26))
-                                                  : patientState
-                                                              .predictionsSummaryChartData
-                                                              .length ==
-                                                          1
-                                                      ? const Text(
-                                                          "Needs 2 days at least",
-                                                          style: TextStyle(
-                                                              fontSize: 28,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w500,
-                                                              color: Colors
-                                                                  .black26))
-                                                      : SfCartesianChart(
-                                                          plotAreaBorderWidth:
-                                                              0,
-                                                          legend: Legend(
-                                                              isVisible: patientState
-                                                                  .predictionsSummaryChartData
-                                                                  .isNotEmpty,
-                                                              position:
-                                                                  LegendPosition
-                                                                      .bottom,
-                                                              overflowMode:
-                                                                  LegendItemOverflowMode
-                                                                      .wrap),
-                                                          primaryXAxis: DateTimeAxis(
-                                                              majorGridLines:
-                                                                  const MajorGridLines(
-                                                                      width: 0),
-                                                              intervalType:
-                                                                  DateTimeIntervalType
-                                                                      .days,
-                                                              dateFormat:
-                                                                  DateFormat
-                                                                      .yMd()),
-                                                          primaryYAxis:
-                                                              NumericAxis(),
-                                                          series:
-                                                              _getStackedAreaSeries(
+                                          Expanded(
+                                            child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(2.0),
+                                                child: patientState
+                                                        .predictionsSummaryChartData
+                                                        .isEmpty
+                                                    ? const Text("No Data",
+                                                        style: TextStyle(
+                                                            fontSize: 28,
+                                                            fontWeight:
+                                                                FontWeight.w500,
+                                                            color:
+                                                                Colors.black26))
+                                                    : patientState
+                                                                .predictionsSummaryChartData
+                                                                .length ==
+                                                            1
+                                                        ? const Text(
+                                                            "Needs 2 days at least",
+                                                            style: TextStyle(
+                                                                fontSize: 28,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w500,
+                                                                color: Colors
+                                                                    .black26))
+                                                        : Expanded(
+                                                            child:
+                                                                SfCartesianChart(
+                                                              plotAreaBorderWidth:
+                                                                  0,
+                                                              legend: Legend(
+                                                                  isVisible: patientState
+                                                                      .predictionsSummaryChartData
+                                                                      .isNotEmpty,
+                                                                  position:
+                                                                      LegendPosition
+                                                                          .bottom,
+                                                                  overflowMode:
+                                                                      LegendItemOverflowMode
+                                                                          .wrap),
+                                                              primaryXAxis: DateTimeAxis(
+                                                                  majorGridLines:
+                                                                      const MajorGridLines(
+                                                                          width:
+                                                                              0),
+                                                                  intervalType:
+                                                                      DateTimeIntervalType
+                                                                          .days,
+                                                                  dateFormat:
+                                                                      DateFormat
+                                                                          .yMd()),
+                                                              primaryYAxis:
+                                                                  NumericAxis(),
+                                                              series: _getStackedAreaSeries(
                                                                   patientState),
-                                                          tooltipBehavior:
-                                                              _tooltipBehavior,
-                                                        )),
+                                                              tooltipBehavior:
+                                                                  _tooltipBehavior,
+                                                            ),
+                                                          )),
+                                          ),
                                         ],
                                       ),
                                     ),
