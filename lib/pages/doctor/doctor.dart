@@ -1,4 +1,5 @@
 import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
+import 'package:fluent_beat/pages/doctor/settings/settings.dart';
 import 'package:fluent_beat/pages/doctor/state/doctor.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -26,7 +27,7 @@ class _DoctorPageState extends State<DoctorPage> {
       Container(),
       Container(),
       Container(),
-      Container(),
+      const DoctorSettings(),
     ];
   }
 

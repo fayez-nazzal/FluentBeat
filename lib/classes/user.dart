@@ -2,8 +2,10 @@
 
 import 'dart:io';
 
+import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:fluent_beat/classes/storage_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class _User {
   final String id;
@@ -13,10 +15,14 @@ class _User {
   final String gender;
   final String email;
   final String join_date;
-  final Image? image;
+  Image? image;
 
-  const _User(
-      {required this.image,
+  void setImage(Image image) {
+    this.image = image;
+  }
+
+  _User(
+      {this.image,
       required this.id,
       required this.name,
       required this.user_country,
