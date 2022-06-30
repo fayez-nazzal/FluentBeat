@@ -151,8 +151,7 @@ class PatientStateController extends GetxController {
 
     winnerClassToday = updateWinner(winnerClassToday, classCountsToday);
 
-    winnerClassThisWeek =
-        updateWinner(winnerClassThisWeek, classCountsThisWeek);
+    winnerClassThisWeek = updateWinner(winnerClassToday, classCountsThisWeek);
 
     update();
   }
