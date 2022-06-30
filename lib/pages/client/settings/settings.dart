@@ -8,10 +8,10 @@ import 'package:fluent_beat/pages/client/state/connection.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-
+import '../../../app.dart';
 import '../../../ui/button.dart';
 import '../../../ui/input.dart';
-import '../../common/login/login.dart';
+import '../../../utils.dart';
 
 class Settings extends StatefulWidget {
   const Settings({Key? key}) : super(key: key);
@@ -30,9 +30,14 @@ class _SettingsState extends State<Settings> {
   static ClientConnectionController get clientConnection => Get.find();
 
   void signOut() async {
-    await Amplify.Auth.signOut();
+    try {
+      await Amplify.Auth.signOut();
+    } catch (e) {
+      showErrorDialog("Unable to sign out.", context);
+    }
 
-    Get.to(const LoginPage());
+    // reset app
+    Get.to(const App());
   }
 
   void checkProfileImage() async {
