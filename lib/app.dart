@@ -4,6 +4,7 @@ import 'package:amplify_storage_s3/amplify_storage_s3.dart';
 import 'package:fluent_beat/pages/client/state/connection.dart';
 import 'package:fluent_beat/pages/client/state/patient.dart';
 import 'package:fluent_beat/pages/common/login/login.dart';
+import 'package:fluent_beat/pages/doctor/state/doctor.dart';
 import 'package:fluent_beat/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -66,6 +67,9 @@ class _AppState extends State<App> {
               builder: (_) => Container()),
           GetBuilder<PatientStateController>(
               init: PatientStateController(), // INIT IT ONLY THE FIRST TIME
+              builder: (_) => Container()),
+          GetBuilder<DoctorStateController>(
+              init: DoctorStateController(), // INIT IT ONLY THE FIRST TIME
               builder: (_) => Container()),
           amplifyConfigured ? const LoginPage() : Container(),
         ],
