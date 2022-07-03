@@ -23,6 +23,8 @@ class _DoctorPageState extends State<DoctorPage> {
   void initState() {
     super.initState();
 
+    doctorState.getInfo();
+
     screens = [
       Container(),
       Container(),

@@ -10,7 +10,7 @@ import '../../../classes/user.dart';
 import 'package:http/http.dart' as http;
 
 class PatientStateController extends GetxController {
-  PatientClient? patient;
+  Patient? patient;
   Map<int, int> predictions = {0: 0, 1: 0, 2: 0, 3: 0};
   List<PredictionsSummaryChartData> predictionsSummaryChartData = [];
   List<AverageBPMSummaryChartData> avgBPMSummaryHeartData = [];
@@ -19,31 +19,6 @@ class PatientStateController extends GetxController {
   int winnerClassToday = -1;
   List<num> classCountsThisWeek = [0, 0, 0, 0];
   List<num> classCountsToday = [0, 0, 0, 0];
-
-  Future getInfo() async {
-    String patientCognitoId = (await Amplify.Auth.getCurrentUser()).userId;
-
-    var client = http.Client();
-    var response = await client.get(
-      Uri.parse(
-          "${dotenv.env["API_URL"]}/patient_info?patient_cognito_id=$patientCognitoId"),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-    );
-
-    // first, decode the full response body
-    // for this request, this will be done automatically, as we are using lambda proxy integration
-    var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-    // TODO handle errors
-
-    // last, get the patient from the body, this will result into a Pateint
-    patient = await PatientClient.fromJson(decodedResponse);
-
-    update();
-
-    getStatistics();
-  }
 
   Future getStatistics() async {
     String patientCognitoId = (await Amplify.Auth.getCurrentUser()).userId;
