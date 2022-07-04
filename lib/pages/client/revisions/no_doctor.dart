@@ -19,6 +19,7 @@ class PatientRevisionsNoDoctor extends StatefulWidget {
 class _PatientRevisionsNoDoctorState extends State<PatientRevisionsNoDoctor> {
   List<Doctor> doctors = [];
   List<Doctor> filteredDoctors = [];
+  final ScrollController _scrollController = ScrollController();
 
   static PatientStateController get patientState => Get.find();
 
@@ -205,66 +206,71 @@ class _PatientRevisionsNoDoctorState extends State<PatientRevisionsNoDoctor> {
                       ),
                     ),
                     Expanded(
-                      child: ListView.builder(
-                          shrinkWrap: true,
-                          scrollDirection: Axis.vertical,
-                          itemCount: filteredDoctors.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            var doctor = filteredDoctors[index];
+                      child: Scrollbar(
+                        thumbVisibility: true,
+                        child: ListView.builder(
+                            controller: _scrollController,
+                            shrinkWrap: true,
+                            scrollDirection: Axis.vertical,
+                            itemCount: filteredDoctors.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              var doctor = filteredDoctors[index];
 
-                            return Column(
-                              children: [
-                                ListTile(
-                                  title: Text(doctor.name),
-                                  leading: ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: doctor.image),
-                                  trailing: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: <Widget>[
-                                      IconButton(
-                                        padding: const EdgeInsets.all(6),
-                                        constraints: const BoxConstraints(),
-                                        color: Colors.green,
-                                        icon: const Icon(Icons.schedule_send,
-                                            size: 26),
-                                        onPressed: doctor.id ==
-                                                patientState
-                                                    .patient!.request_doctor_id
-                                            ? null
-                                            : () {
-                                                requestDoctor(doctor.id);
-                                              },
-                                      ),
-                                      IconButton(
-                                        padding: const EdgeInsets.all(6),
-                                        constraints: const BoxConstraints(),
-                                        color: Colors.red,
-                                        icon:
-                                            const Icon(Icons.cancel, size: 26),
-                                        onPressed: doctor.id ==
-                                                patientState
-                                                    .patient!.request_doctor_id
-                                            ? cancelDoctorRequest
-                                            : null,
-                                      ),
-                                    ],
+                              return Column(
+                                children: [
+                                  ListTile(
+                                    title: Text(doctor.name),
+                                    leading: ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: doctor.image),
+                                    trailing: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: <Widget>[
+                                        IconButton(
+                                          padding: const EdgeInsets.all(6),
+                                          constraints: const BoxConstraints(),
+                                          color: Colors.green,
+                                          icon: const Icon(Icons.schedule_send,
+                                              size: 26),
+                                          onPressed: doctor.id ==
+                                                  patientState.patient!
+                                                      .request_doctor_id
+                                              ? null
+                                              : () {
+                                                  requestDoctor(doctor.id);
+                                                },
+                                        ),
+                                        IconButton(
+                                          padding: const EdgeInsets.all(6),
+                                          constraints: const BoxConstraints(),
+                                          color: Colors.red,
+                                          icon: const Icon(Icons.cancel,
+                                              size: 26),
+                                          onPressed: doctor.id ==
+                                                  patientState.patient!
+                                                      .request_doctor_id
+                                              ? cancelDoctorRequest
+                                              : null,
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
 
-                                // if this is the last one, no need for divider
-                                if (doctor.id !=
-                                    filteredDoctors[filteredDoctors.length - 1]
-                                        .id)
-                                  Divider(
-                                      thickness: 2,
-                                      height: 16,
-                                      indent: 16,
-                                      endIndent: 16,
-                                      color: Colors.grey.withOpacity(0.22)),
-                              ],
-                            );
-                          }),
+                                  // if this is the last one, no need for divider
+                                  if (doctor.id !=
+                                      filteredDoctors[
+                                              filteredDoctors.length - 1]
+                                          .id)
+                                    Divider(
+                                        thickness: 2,
+                                        height: 16,
+                                        indent: 16,
+                                        endIndent: 16,
+                                        color: Colors.grey.withOpacity(0.22)),
+                                ],
+                              );
+                            }),
+                      ),
                     ),
                   ],
                 ),

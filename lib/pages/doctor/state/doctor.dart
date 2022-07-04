@@ -77,5 +77,7 @@ class DoctorStateController extends GetxController {
         doctor!.setImage(image);
       }
     }
+
+    update();
   }
 }

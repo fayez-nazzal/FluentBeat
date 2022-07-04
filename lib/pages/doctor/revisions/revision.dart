@@ -25,6 +25,7 @@ class _DoctorPatientCurrentRevisionState
   static DoctorStateController get doctorState => Get.find();
   var commentField = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  final ScrollController _commentsScrollController = ScrollController();
 
   @override
   void initState() {
@@ -253,9 +254,11 @@ class _DoctorPatientCurrentRevisionState
                           padding: const EdgeInsets.only(top: 10.0),
                           child: Scrollbar(
                             thumbVisibility: true,
+                            controller: _commentsScrollController,
                             child: ListView.builder(
                                 shrinkWrap: true,
                                 scrollDirection: Axis.vertical,
+                                controller: _commentsScrollController,
                                 itemCount: doctorState
                                     .currentRevision!.comments.length,
                                 itemBuilder: (BuildContext context, int index) {

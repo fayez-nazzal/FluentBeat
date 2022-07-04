@@ -28,6 +28,7 @@ class PatientRevisionsState extends State<PatientRevisions> {
   List<Revision> revisions = [];
   bool hasDoctor = false;
   Revision? currentRevision;
+  final ScrollController _scrollController = ScrollController();
 
   static PatientStateController get patientState => Get.find();
 
@@ -155,8 +156,10 @@ class PatientRevisionsState extends State<PatientRevisions> {
                 patientState.patient!.doctor != null)
               Expanded(
                 child: Scrollbar(
+                  controller: _scrollController,
                   thumbVisibility: true,
                   child: ListView.builder(
+                      controller: _scrollController,
                       shrinkWrap: true,
                       scrollDirection: Axis.vertical,
                       itemCount: revisionsTiles.length,

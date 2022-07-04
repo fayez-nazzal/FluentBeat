@@ -1,11 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 import 'package:amplify_flutter/amplify_flutter.dart';
+import 'package:fluent_beat/classes/storage_repository.dart';
 import 'package:fluent_beat/pages/client/dashboard/chart_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../classes/user.dart';
 import 'package:http/http.dart' as http;
 
@@ -19,6 +22,7 @@ class PatientStateController extends GetxController {
   int winnerClassToday = -1;
   List<num> classCountsThisWeek = [0, 0, 0, 0];
   List<num> classCountsToday = [0, 0, 0, 0];
+  final ImagePicker _picker = ImagePicker();
 
   Future getInfo() async {
     String patientCognitoId = (await Amplify.Auth.getCurrentUser()).userId;
@@ -152,6 +156,27 @@ class PatientStateController extends GetxController {
     winnerClassToday = updateWinner(winnerClassToday, classCountsToday);
 
     winnerClassThisWeek = updateWinner(winnerClassToday, classCountsThisWeek);
+
+    update();
+  }
+
+  final ImagePicker imagePicker = ImagePicker();
+
+  void pickImage() async {
+    var pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      var user = await Amplify.Auth.getCurrentUser();
+
+      File? file = await StorageRepository.uploadProfileImage(
+          File(pickedFile.path), user.userId);
+
+      if (file != null) {
+        Image image = Image.file(file);
+
+        patient!.setImage(image);
+      }
+    }
 
     update();
   }

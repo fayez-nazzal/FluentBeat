@@ -26,6 +26,7 @@ class _CurrentRevisionState extends State<CurrentRevision> {
   static PatientStateController get patientState => Get.find();
   var commentField = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  final ScrollController _commentsScrollController = ScrollController();
 
   @override
   void initState() {
@@ -111,9 +112,8 @@ class _CurrentRevisionState extends State<CurrentRevision> {
                     height: 68.0,
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Expanded(
-                        child: Card(
-                            child: Padding(
+                    child: Card(
+                        child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -147,7 +147,7 @@ class _CurrentRevisionState extends State<CurrentRevision> {
                           )
                         ],
                       ),
-                    ))),
+                    )),
                   ),
                   Padding(
                     padding: EdgeInsets.symmetric(vertical: 8.0),
@@ -232,42 +232,42 @@ class _CurrentRevisionState extends State<CurrentRevision> {
                               Expanded(
                                 child: Padding(
                                   padding: const EdgeInsets.only(top: 10.0),
-                                  child: Expanded(
-                                    child: Scrollbar(
-                                      thumbVisibility: true,
-                                      child: ListView.builder(
-                                          shrinkWrap: true,
-                                          scrollDirection: Axis.vertical,
-                                          itemCount:
-                                              widget.revision.comments.length,
-                                          itemBuilder: (BuildContext context,
-                                              int index) {
-                                            var comment =
-                                                widget.revision.comments[index];
+                                  child: Scrollbar(
+                                    thumbVisibility: true,
+                                    controller: _commentsScrollController,
+                                    child: ListView.builder(
+                                        controller: _commentsScrollController,
+                                        shrinkWrap: true,
+                                        scrollDirection: Axis.vertical,
+                                        itemCount:
+                                            widget.revision.comments.length,
+                                        itemBuilder:
+                                            (BuildContext context, int index) {
+                                          var comment =
+                                              widget.revision.comments[index];
 
-                                            return Column(
-                                              children: [
-                                                ListTile(
-                                                  leading: ClipRRect(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              8.0),
-                                                      child: patientState
-                                                          .patient!.image),
-                                                  title: Text(comment.body),
-                                                  subtitle: Text(
-                                                      comment.getDaysAgo()),
-                                                ),
-                                                Divider(
-                                                  height: 3,
-                                                  thickness: 2,
-                                                  color: Colors.grey
-                                                      .withOpacity(0.22),
-                                                ),
-                                              ],
-                                            );
-                                          }),
-                                    ),
+                                          return Column(
+                                            children: [
+                                              ListTile(
+                                                leading: ClipRRect(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8.0),
+                                                    child: patientState
+                                                        .patient!.image),
+                                                title: Text(comment.body),
+                                                subtitle:
+                                                    Text(comment.getDaysAgo()),
+                                              ),
+                                              Divider(
+                                                height: 3,
+                                                thickness: 2,
+                                                color: Colors.grey
+                                                    .withOpacity(0.22),
+                                              ),
+                                            ],
+                                          );
+                                        }),
                                   ),
                                 ),
                               ),

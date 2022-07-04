@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../app.dart';
 import '../../../ui/button.dart';
-import '../../../ui/input.dart';
 import '../../../utils.dart';
 
 class DoctorSettings extends StatefulWidget {
@@ -40,118 +39,126 @@ class _DoctorSettingsState extends State<DoctorSettings> {
     return GetBuilder<DoctorStateController>(
         builder: (doctorState) => doctorState.doctor == null
             ? Container()
-            : Column(
-                children: [
-                  Stack(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(32), // Image border
-                        child: SizedBox.fromSize(
-                          size: const Size.fromRadius(80), // Image radius
-                          child: doctorState.doctor!.image,
-                        ),
-                      ),
-                      Positioned(
-                        right: -10,
-                        bottom: -10,
-                        child: Container(
-                          decoration: const BoxDecoration(
-                            color: Colors.white60,
-                            shape: BoxShape.circle,
-                          ),
-                          child: IconButton(
-                              icon: const Icon(
-                                Icons.edit,
-                                color: Color(0xFFff6b6b),
-                              ),
-                              onPressed: doctorState.pickImage),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-
-                  const Text("Profile Info",
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
-                  const SizedBox(height: 16),
-                  // show user info in list view
-                  Expanded(
-                    child: ListView(
-                      shrinkWrap: true,
+            : Padding(
+                padding: const EdgeInsets.symmetric(vertical: 18.0),
+                child: Column(
+                  children: [
+                    Stack(
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 22.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text("Name",
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500)),
-                              Text(doctorState.doctor!.name,
-                                  style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500)),
-                            ],
+                        ClipRRect(
+                          borderRadius:
+                              BorderRadius.circular(32), // Image border
+                          child: SizedBox.fromSize(
+                            size: const Size.fromRadius(80), // Image radius
+                            child: doctorState.doctor!.image,
                           ),
                         ),
-                        const SizedBox(height: 6),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 22.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text("Email",
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500)),
-                              Text("${doctorState.doctor!.email}com",
-                                  style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500)),
-                            ],
+                        Positioned(
+                          right: -10,
+                          bottom: -10,
+                          child: Container(
+                            decoration: const BoxDecoration(
+                              color: Colors.white60,
+                              shape: BoxShape.circle,
+                            ),
+                            child: IconButton(
+                                icon: const Icon(
+                                  Icons.edit,
+                                  color: Color(0xFFff6b6b),
+                                ),
+                                onPressed: doctorState.pickImage),
                           ),
                         ),
-                        const SizedBox(height: 6),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 22.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: const [
-                              Text("User Type",
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500)),
-                              Text("DOCTOR",
-                                  style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500)),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 22.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text("Birth Date",
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500)),
-                              Text("${doctorState.doctor!.birth_date}com",
-                                  style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500)),
-                            ],
-                          ),
-                        )
                       ],
                     ),
-                  ),
-                  Button(bg: 0xffffffff, text: "Sign Out", onPress: signOut),
-                ],
+                    const SizedBox(height: 24),
+
+                    const Text("Profile Info",
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.w500)),
+                    const SizedBox(height: 16),
+                    // show user info in list view
+                    Expanded(
+                      child: ListView(
+                        shrinkWrap: true,
+                        children: [
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 22.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text("Name",
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500)),
+                                Text(doctorState.doctor!.name,
+                                    style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500)),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 22.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text("Email",
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500)),
+                                Text("${doctorState.doctor!.email}com",
+                                    style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500)),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 22.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: const [
+                                Text("User Type",
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500)),
+                                Text("DOCTOR",
+                                    style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500)),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 22.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text("Birth Date",
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500)),
+                                Text("${doctorState.doctor!.birth_date}com",
+                                    style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500)),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                    Button(bg: 0xffffffff, text: "Sign Out", onPress: signOut),
+                  ],
+                ),
               ));
   }
 }
