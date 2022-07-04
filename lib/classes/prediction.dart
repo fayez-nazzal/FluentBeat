@@ -30,12 +30,12 @@ class Prediction {
   static Future<Prediction> fromJson(json) async {
     return Prediction(
         date: json['date'],
-        bpm_count: int.parse(json['bpmCount']),
-        bpm_sum: int.parse(json['bpmSum']),
-        class_0: int.parse(json['class_0']),
-        class_1: int.parse(json['class_1']),
-        class_2: int.parse(json['class_2']),
-        class_3: int.parse(json['class_3']),
+        bpm_count: int.parse(json['bpm_count'] ?? "0"),
+        bpm_sum: int.parse(json['bpm_sum'] ?? "0"),
+        class_0: int.parse(json['class_0'] ?? "0"),
+        class_1: int.parse(json['class_1'] ?? "0"),
+        class_2: int.parse(json['class_2'] ?? "0"),
+        class_3: int.parse(json['class_3'] ?? "0"),
         image: null);
   }
 }

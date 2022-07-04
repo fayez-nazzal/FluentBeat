@@ -177,7 +177,7 @@ class SignupPageState extends State<SignupPage> {
             jsonDecode(utf8.decode(response.bodyBytes)) as Map;
 
         if (response.statusCode == 200) {
-          Get.to(ClientPage(user: user));
+          Get.to(() => ClientPage(user: user));
         }
       }).onError((error, stackTrace) {
         setState(() {

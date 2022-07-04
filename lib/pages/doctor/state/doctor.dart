@@ -15,8 +15,16 @@ import 'package:http/http.dart' as http;
 class DoctorStateController extends GetxController {
   DoctorClient? _doctor;
 
-  DoctorClient? get doctor => _doctor;
   final ImagePicker _picker = ImagePicker();
+  int _selectedPatient = -1;
+
+  DoctorClient? get doctor => _doctor;
+  int get selectedPatient => _selectedPatient;
+
+  void setSelectedPatient(int patientId) {
+    _selectedPatient = patientId;
+    update();
+  }
 
   void getInfo() async {
     String doctorCognitoId = (await Amplify.Auth.getCurrentUser()).userId;

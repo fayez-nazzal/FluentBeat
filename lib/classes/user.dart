@@ -226,7 +226,9 @@ class Patient extends _User {
           gender: gender,
           email: email,
           join_date: join_date,
-        );
+        ) {
+    getStatistics();
+  }
 
   static Future<Patient> fromJson(json) async {
     String id = json['id'];

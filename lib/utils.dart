@@ -12,9 +12,9 @@ void redirectUserToRelevantPage(AuthUser user) async {
     for (var element in userAttributes) {
       if (element.userAttributeKey.toString() == "custom:usertype") {
         if (element.value == "USER") {
-          Get.to(ClientPage(user: user));
+          Get.to(() => ClientPage(user: user));
         } else if (element.value == "DOCTOR") {
-          Get.to(DoctorPage(user: user));
+          Get.to(() => DoctorPage(user: user));
         }
       }
     }

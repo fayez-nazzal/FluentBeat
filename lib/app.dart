@@ -28,7 +28,7 @@ class _AppState extends State<App> {
       user = await Amplify.Auth.getCurrentUser();
 
       redirectUserToRelevantPage(user);
-    } on AuthException {
+    } on Exception catch (e) {
       // amplify would be configured if we reach here, so redirect to Login page
       setState(() {
         amplifyConfigured = true;
@@ -44,9 +44,7 @@ class _AppState extends State<App> {
 
       // call Amplify.configure to use the initialized categories in your app
       await Amplify.configure(amplifyconfig);
-    } on Exception catch (e) {
-      print('An error occurred configuring Amplify: $e');
-    }
+    } on Exception catch (e) {}
 
     checkUser();
   }

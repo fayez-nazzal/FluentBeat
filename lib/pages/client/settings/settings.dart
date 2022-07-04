@@ -37,7 +37,7 @@ class _SettingsState extends State<Settings> {
     }
 
     // reset app
-    Get.to(const App());
+    Get.to(() => const App());
   }
 
   void checkProfileImage() async {

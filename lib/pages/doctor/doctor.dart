@@ -1,4 +1,5 @@
 import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
+import 'package:fluent_beat/pages/doctor/dashboard/dashboard.dart';
 import 'package:fluent_beat/pages/doctor/settings/settings.dart';
 import 'package:fluent_beat/pages/doctor/state/doctor.dart';
 import 'package:flutter/material.dart';
@@ -26,7 +27,7 @@ class _DoctorPageState extends State<DoctorPage> {
     doctorState.getInfo();
 
     screens = [
-      Container(),
+      DoctorDashboard(),
       Container(),
       Container(),
       const DoctorSettings(),
@@ -53,7 +54,7 @@ class _DoctorPageState extends State<DoctorPage> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
-            label: "Patients",
+            label: "Predictions",
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.medication),

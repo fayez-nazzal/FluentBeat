@@ -123,7 +123,7 @@ class _LoginPageState extends State<LoginPage> {
                               onPrimary: 0xffffff,
                               onPress: () {
                                 setState(() {
-                                  Get.to(SignupPage(
+                                  Get.to(() => SignupPage(
                                       username: username, password: password));
                                 });
                               }),

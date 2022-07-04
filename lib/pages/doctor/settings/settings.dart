@@ -31,7 +31,7 @@ class _DoctorSettingsState extends State<DoctorSettings> {
     }
 
     // reset app
-    Get.to(const App());
+    Get.to(() => const App());
   }
 
   @override
@@ -42,7 +42,6 @@ class _DoctorSettingsState extends State<DoctorSettings> {
   @override
   Widget build(BuildContext context) {
     return GetBuilder<DoctorStateController>(
-        init: DoctorStateController(), // INIT IT ONLY THE FIRST TIME
         builder: (doctorState) => doctorState.doctor == null
             ? Container()
             : Column(

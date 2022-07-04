@@ -24,8 +24,8 @@ class StorageRepository {
       await file.copy(filepath);
 
       return file;
-    } catch (e) {
-      // rethrow;
+    } on Exception catch (e) {
+      return null;
     }
   }
 
@@ -40,14 +40,12 @@ class StorageRepository {
         return file;
       }
 
-      print("getting id.$format");
-
       // if not, download it
       final result =
           await Amplify.Storage.downloadFile(local: file, key: "$id.$format");
 
       return File(result.file.path);
-    } catch (e) {
+    } on Exception catch (e) {
       // file not found, do nothing
       return null;
     }
