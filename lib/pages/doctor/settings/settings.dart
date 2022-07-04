@@ -19,10 +19,6 @@ class DoctorSettings extends StatefulWidget {
 }
 
 class _DoctorSettingsState extends State<DoctorSettings> {
-  String username = "";
-  String password = "";
-  // static DoctorStateController get doctorState => Get.find();
-
   void signOut() async {
     try {
       await Amplify.Auth.signOut();
@@ -73,17 +69,86 @@ class _DoctorSettingsState extends State<DoctorSettings> {
                       ),
                     ],
                   ),
-                  Input(
-                      onChange: (txt) {
-                        username = txt.trim();
-                      },
-                      labelText: "Email"),
-                  Input(
-                    onChange: (txt) {
-                      password = txt;
-                    },
-                    labelText: "Password",
-                    password: true,
+                  const SizedBox(height: 24),
+
+                  const Text("Profile Info",
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
+                  const SizedBox(height: 16),
+                  // show user info in list view
+                  Expanded(
+                    child: ListView(
+                      shrinkWrap: true,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 22.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text("Name",
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500)),
+                              Text(doctorState.doctor!.name,
+                                  style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500)),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 22.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text("Email",
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500)),
+                              Text("${doctorState.doctor!.email}com",
+                                  style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500)),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 22.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: const [
+                              Text("User Type",
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500)),
+                              Text("DOCTOR",
+                                  style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500)),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 22.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text("Birth Date",
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500)),
+                              Text("${doctorState.doctor!.birth_date}com",
+                                  style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500)),
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
                   ),
                   Button(bg: 0xffffffff, text: "Sign Out", onPress: signOut),
                 ],
