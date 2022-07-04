@@ -1,6 +1,8 @@
 import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
 import 'package:fluent_beat/pages/doctor/dashboard/dashboard.dart';
 import 'package:fluent_beat/pages/doctor/predictions/predictions.dart';
+import 'package:fluent_beat/pages/doctor/requests/requests.dart';
+import 'package:fluent_beat/pages/doctor/revisions/revisions.dart';
 import 'package:fluent_beat/pages/doctor/settings/settings.dart';
 import 'package:fluent_beat/pages/doctor/state/doctor.dart';
 import 'package:flutter/material.dart';
@@ -30,7 +32,8 @@ class _DoctorPageState extends State<DoctorPage> {
     screens = [
       const DoctorDashboard(),
       const DoctorPatientsPredictions(),
-      Container(),
+      const DoctorPatientsRevisions(),
+      const DoctorPatientRequests(),
       const DoctorSettings(),
     ];
   }
@@ -46,7 +49,9 @@ class _DoctorPageState extends State<DoctorPage> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        iconSize: 28,
+        iconSize: 18,
+        unselectedFontSize: 10,
+        selectedFontSize: 11,
         unselectedItemColor: const Color(0xff86AEAD),
         items: const [
           BottomNavigationBarItem(
@@ -60,6 +65,10 @@ class _DoctorPageState extends State<DoctorPage> {
           BottomNavigationBarItem(
             icon: Icon(Icons.medication),
             label: "Revisions",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.call_received),
+            label: "Requests",
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),

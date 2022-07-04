@@ -119,7 +119,7 @@ class _DoctorDashboardState extends State<DoctorDashboard> {
                           child: doctorState.doctor!.image ?? Container(),
                         ),
                         const Spacer(),
-                        Text(doctorState.doctor!.name ?? "",
+                        Text(doctorState.doctor!.name,
                             style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w500,
@@ -164,12 +164,13 @@ class _DoctorDashboardState extends State<DoctorDashboard> {
                     )
                   ],
                 ),
-                Text(
-                    "${doctorState.doctor!.patients[doctorState.selectedPatient].name}'s Charts",
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                    )),
+                if (doctorState.selectedPatient != -1)
+                  Text(
+                      "${doctorState.doctor!.patients[doctorState.selectedPatient].name}'s Charts",
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      )),
                 const Divider(
                   thickness: 2,
                   color: Colors.black12,
@@ -177,204 +178,53 @@ class _DoctorDashboardState extends State<DoctorDashboard> {
                 ),
                 if (doctorState.selectedPatient != -1)
                   Expanded(
-                    child: Container(
-                      child: Scrollbar(
-                          thumbVisibility: true,
-                          controller: _scrollController,
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.vertical,
-                              controller: _scrollController,
-                              child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: SizedBox(
-                                        width: double.infinity,
-                                        height: 80,
-                                        child: Card(
-                                          child: Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.center,
-                                            // title
-                                            children: [
-                                              const Text(
-                                                'Most Frequent Class This week',
-                                                style: TextStyle(
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.w500,
-                                                    color: Colors.black87),
-                                              ),
-                                              const SizedBox(height: 8),
-                                              _getWinnerClassText(
-                                                doctorState.doctor!.patients[
-                                                    doctorState
-                                                        .selectedPatient],
-                                              )
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: SizedBox(
-                                        width: double.infinity,
-                                        height: 80,
-                                        child: Card(
-                                          child: Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.center,
-                                            children: [
-                                              const Text(
-                                                'Average Heart Rate This Week',
-                                                style: TextStyle(
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.w500,
-                                                    color: Colors.black87),
-                                              ),
-                                              const SizedBox(height: 8),
-                                              Text(
-                                                doctorState
-                                                            .doctor!
-                                                            .patients[doctorState
-                                                                .selectedPatient]
-                                                            .averageBPMThisWeek ==
-                                                        0
-                                                    ? "~"
-                                                    : doctorState
-                                                        .doctor!
-                                                        .patients[doctorState
-                                                            .selectedPatient]
-                                                        .averageBPMThisWeek
-                                                        .toString(),
-                                                style: TextStyle(
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.w500,
-                                                    color: (doctorState
-                                                                    .doctor!
-                                                                    .patients[
-                                                                        doctorState
-                                                                            .selectedPatient]
-                                                                    .averageBPMThisWeek <
-                                                                70 ||
-                                                            doctorState
-                                                                    .doctor!
-                                                                    .patients[
-                                                                        doctorState
-                                                                            .selectedPatient]
-                                                                    .averageBPMThisWeek >
-                                                                120)
-                                                        ? Colors.red
-                                                        : Colors.green),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(
-                                      height: 6,
-                                    ),
-                                    SizedBox(
-                                      height: 380,
+                    child: Scrollbar(
+                        thumbVisibility: true,
+                        controller: _scrollController,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.vertical,
+                            controller: _scrollController,
+                            child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: SizedBox(
                                       width: double.infinity,
-                                      child: Expanded(
+                                      height: 80,
+                                      child: Card(
                                         child: Column(
                                           mainAxisAlignment:
                                               MainAxisAlignment.center,
                                           crossAxisAlignment:
                                               CrossAxisAlignment.center,
+                                          // title
                                           children: [
-                                            const SizedBox(
-                                              height: 6,
+                                            const Text(
+                                              'Most Frequent Class This week',
+                                              style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: Colors.black87),
                                             ),
-                                            Expanded(
-                                              child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(2.0),
-                                                  child: doctorState
-                                                          .doctor!
-                                                          .patients[doctorState
-                                                              .selectedPatient]
-                                                          .predictionsSummaryChartData
-                                                          .isEmpty
-                                                      ? const Text("No Data",
-                                                          style: TextStyle(
-                                                              fontSize: 28,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w500,
-                                                              color: Colors
-                                                                  .black26))
-                                                      : doctorState
-                                                                  .doctor!
-                                                                  .patients[doctorState
-                                                                      .selectedPatient]
-                                                                  .predictionsSummaryChartData
-                                                                  .length ==
-                                                              1
-                                                          ? const Text(
-                                                              "Needs 2 days at least",
-                                                              style: TextStyle(
-                                                                  fontSize: 28,
-                                                                  fontWeight: FontWeight.w500,
-                                                                  color: Colors.black26))
-                                                          : Expanded(
-                                                              child:
-                                                                  SfCartesianChart(
-                                                                plotAreaBorderWidth:
-                                                                    0,
-                                                                legend: Legend(
-                                                                    isVisible: doctorState
-                                                                        .doctor!
-                                                                        .patients[doctorState
-                                                                            .selectedPatient]
-                                                                        .predictionsSummaryChartData
-                                                                        .isNotEmpty,
-                                                                    position:
-                                                                        LegendPosition
-                                                                            .bottom,
-                                                                    overflowMode:
-                                                                        LegendItemOverflowMode
-                                                                            .wrap),
-                                                                primaryXAxis: DateTimeAxis(
-                                                                    majorGridLines:
-                                                                        const MajorGridLines(
-                                                                            width:
-                                                                                0),
-                                                                    intervalType:
-                                                                        DateTimeIntervalType
-                                                                            .days,
-                                                                    dateFormat:
-                                                                        DateFormat
-                                                                            .yMd()),
-                                                                primaryYAxis:
-                                                                    NumericAxis(),
-                                                                series: _getStackedAreaSeries(doctorState
-                                                                        .doctor!
-                                                                        .patients[
-                                                                    doctorState
-                                                                        .selectedPatient]),
-                                                                tooltipBehavior:
-                                                                    _tooltipBehavior,
-                                                              ),
-                                                            )),
-                                            ),
+                                            const SizedBox(height: 8),
+                                            _getWinnerClassText(
+                                              doctorState.doctor!.patients[
+                                                  doctorState.selectedPatient],
+                                            )
                                           ],
                                         ),
                                       ),
                                     ),
-                                    SizedBox(
-                                      height: 340,
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: SizedBox(
                                       width: double.infinity,
+                                      height: 80,
                                       child: Card(
                                         child: Column(
                                           mainAxisAlignment:
@@ -382,74 +232,218 @@ class _DoctorDashboardState extends State<DoctorDashboard> {
                                           crossAxisAlignment:
                                               CrossAxisAlignment.center,
                                           children: [
-                                            const Text("This Week BPM ",
-                                                style: TextStyle(
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.w500,
-                                                    color: Colors.black87)),
-                                            const SizedBox(
-                                              height: 6,
+                                            const Text(
+                                              'Average Heart Rate This Week',
+                                              style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: Colors.black87),
                                             ),
-                                            Padding(
-                                                padding:
-                                                    const EdgeInsets.all(2.0),
-                                                child: doctorState
-                                                            .doctor!
-                                                            .patients[doctorState
-                                                                .selectedPatient]
-                                                            .averageBPMThisWeek ==
-                                                        0
-                                                    ? const Text("No Data",
-                                                        style: TextStyle(
-                                                            fontSize: 28,
-                                                            fontWeight:
-                                                                FontWeight.w500,
-                                                            color:
-                                                                Colors.black26))
-                                                    : SfCartesianChart(
-                                                        plotAreaBorderWidth: 0,
-                                                        legend: Legend(
-                                                            isVisible: doctorState
-                                                                .doctor!
-                                                                .patients[
-                                                                    doctorState
-                                                                        .selectedPatient]
-                                                                .predictionsSummaryChartData
-                                                                .isNotEmpty,
-                                                            position:
-                                                                LegendPosition
-                                                                    .bottom,
-                                                            overflowMode:
-                                                                LegendItemOverflowMode
-                                                                    .wrap),
-                                                        primaryXAxis: DateTimeAxis(
-                                                            majorGridLines:
-                                                                const MajorGridLines(
-                                                                    width: 0),
-                                                            intervalType:
-                                                                DateTimeIntervalType
-                                                                    .days,
-                                                            dateFormat:
-                                                                DateFormat
-                                                                    .yMd()),
-                                                        primaryYAxis:
-                                                            NumericAxis(),
-                                                        series: _getBPMBarSeries(
-                                                            doctorState.doctor!
-                                                                    .patients[
-                                                                doctorState
-                                                                    .selectedPatient]),
-                                                        tooltipBehavior:
-                                                            _tooltipBehavior,
-                                                      )),
+                                            const SizedBox(height: 8),
+                                            Text(
+                                              doctorState
+                                                          .doctor!
+                                                          .patients[doctorState
+                                                              .selectedPatient]
+                                                          .averageBPMThisWeek ==
+                                                      0
+                                                  ? "~"
+                                                  : doctorState
+                                                      .doctor!
+                                                      .patients[doctorState
+                                                          .selectedPatient]
+                                                      .averageBPMThisWeek
+                                                      .toString(),
+                                              style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: (doctorState
+                                                                  .doctor!
+                                                                  .patients[
+                                                                      doctorState
+                                                                          .selectedPatient]
+                                                                  .averageBPMThisWeek <
+                                                              70 ||
+                                                          doctorState
+                                                                  .doctor!
+                                                                  .patients[
+                                                                      doctorState
+                                                                          .selectedPatient]
+                                                                  .averageBPMThisWeek >
+                                                              120)
+                                                      ? Colors.red
+                                                      : Colors.green),
+                                            ),
                                           ],
                                         ),
                                       ),
                                     ),
-                                  ]),
-                            ),
-                          )),
-                    ),
+                                  ),
+                                  const SizedBox(
+                                    height: 6,
+                                  ),
+                                  SizedBox(
+                                    height: 380,
+                                    width: double.infinity,
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        const SizedBox(
+                                          height: 6,
+                                        ),
+                                        Expanded(
+                                          child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(2.0),
+                                              child: doctorState
+                                                      .doctor!
+                                                      .patients[doctorState
+                                                          .selectedPatient]
+                                                      .predictionsSummaryChartData
+                                                      .isEmpty
+                                                  ? const Text("No Data",
+                                                      style: TextStyle(
+                                                          fontSize: 28,
+                                                          fontWeight:
+                                                              FontWeight.w500,
+                                                          color:
+                                                              Colors.black26))
+                                                  : doctorState
+                                                              .doctor!
+                                                              .patients[doctorState
+                                                                  .selectedPatient]
+                                                              .predictionsSummaryChartData
+                                                              .length ==
+                                                          1
+                                                      ? const Text(
+                                                          "Needs 2 days at least",
+                                                          style: TextStyle(
+                                                              fontSize: 28,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w500,
+                                                              color: Colors
+                                                                  .black26))
+                                                      : SfCartesianChart(
+                                                          plotAreaBorderWidth:
+                                                              0,
+                                                          legend: Legend(
+                                                              isVisible: doctorState
+                                                                  .doctor!
+                                                                  .patients[
+                                                                      doctorState
+                                                                          .selectedPatient]
+                                                                  .predictionsSummaryChartData
+                                                                  .isNotEmpty,
+                                                              position:
+                                                                  LegendPosition
+                                                                      .bottom,
+                                                              overflowMode:
+                                                                  LegendItemOverflowMode
+                                                                      .wrap),
+                                                          primaryXAxis: DateTimeAxis(
+                                                              majorGridLines:
+                                                                  const MajorGridLines(
+                                                                      width: 0),
+                                                              intervalType:
+                                                                  DateTimeIntervalType
+                                                                      .days,
+                                                              dateFormat:
+                                                                  DateFormat
+                                                                      .yMd()),
+                                                          primaryYAxis:
+                                                              NumericAxis(),
+                                                          series: _getStackedAreaSeries(
+                                                              doctorState
+                                                                      .doctor!
+                                                                      .patients[
+                                                                  doctorState
+                                                                      .selectedPatient]),
+                                                          tooltipBehavior:
+                                                              _tooltipBehavior,
+                                                        )),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: 340,
+                                    width: double.infinity,
+                                    child: Card(
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          const Text("This Week BPM ",
+                                              style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: Colors.black87)),
+                                          const SizedBox(
+                                            height: 6,
+                                          ),
+                                          Padding(
+                                              padding:
+                                                  const EdgeInsets.all(2.0),
+                                              child: doctorState
+                                                          .doctor!
+                                                          .patients[doctorState
+                                                              .selectedPatient]
+                                                          .averageBPMThisWeek ==
+                                                      0
+                                                  ? const Text("No Data",
+                                                      style: TextStyle(
+                                                          fontSize: 28,
+                                                          fontWeight:
+                                                              FontWeight.w500,
+                                                          color:
+                                                              Colors.black26))
+                                                  : SfCartesianChart(
+                                                      plotAreaBorderWidth: 0,
+                                                      legend: Legend(
+                                                          isVisible: doctorState
+                                                              .doctor!
+                                                              .patients[doctorState
+                                                                  .selectedPatient]
+                                                              .predictionsSummaryChartData
+                                                              .isNotEmpty,
+                                                          position:
+                                                              LegendPosition
+                                                                  .bottom,
+                                                          overflowMode:
+                                                              LegendItemOverflowMode
+                                                                  .wrap),
+                                                      primaryXAxis: DateTimeAxis(
+                                                          majorGridLines:
+                                                              const MajorGridLines(
+                                                                  width: 0),
+                                                          intervalType:
+                                                              DateTimeIntervalType
+                                                                  .days,
+                                                          dateFormat:
+                                                              DateFormat.yMd()),
+                                                      primaryYAxis:
+                                                          NumericAxis(),
+                                                      series: _getBPMBarSeries(
+                                                          doctorState.doctor!
+                                                                  .patients[
+                                                              doctorState
+                                                                  .selectedPatient]),
+                                                      tooltipBehavior:
+                                                          _tooltipBehavior,
+                                                    )),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ]),
+                          ),
+                        )),
                   ),
               ]));
   }

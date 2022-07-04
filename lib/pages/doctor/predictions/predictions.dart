@@ -11,13 +11,14 @@ class DoctorPatientsPredictions extends StatefulWidget {
 }
 
 class _DoctorPatientsPredictionsState extends State<DoctorPatientsPredictions> {
+  final ScrollController _scrollController = ScrollController();
+
   @override
   Widget build(BuildContext context) {
     return GetBuilder<DoctorStateController>(
-        builder: (doctorState) => doctorState.doctor == null &&
+        builder: (doctorState) => doctorState.doctor != null &&
                 doctorState.doctor!.patients.isNotEmpty
-            ? Container()
-            : Column(
+            ? Column(
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -74,8 +75,10 @@ class _DoctorPatientsPredictionsState extends State<DoctorPatientsPredictions> {
                   if (doctorState.selectedPatient != -1)
                     Expanded(
                       child: Scrollbar(
+                        controller: _scrollController,
                         thumbVisibility: true,
                         child: ListView.builder(
+                            controller: _scrollController,
                             shrinkWrap: true,
                             scrollDirection: Axis.vertical,
                             itemCount: doctorState
@@ -152,6 +155,7 @@ class _DoctorPatientsPredictionsState extends State<DoctorPatientsPredictions> {
                       ),
                     ),
                 ],
-              ));
+              )
+            : Container());
   }
 }

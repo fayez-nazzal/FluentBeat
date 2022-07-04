@@ -17,12 +17,19 @@ class DoctorStateController extends GetxController {
 
   final ImagePicker _picker = ImagePicker();
   int _selectedPatient = -1;
+  Revision? _currentRevision;
 
   DoctorClient? get doctor => _doctor;
   int get selectedPatient => _selectedPatient;
+  Revision? get currentRevision => _currentRevision;
 
   void setSelectedPatient(int patientId) {
     _selectedPatient = patientId;
+    update();
+  }
+
+  void setCurrentRevision(Revision? revision) {
+    _currentRevision = revision;
     update();
   }
 
