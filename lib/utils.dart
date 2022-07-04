@@ -18,7 +18,7 @@ void redirectUserToRelevantPage(AuthUser user) async {
         }
       }
     }
-  } on Exception {
+  } catch (e) {
     // nothing to do...
   }
 }

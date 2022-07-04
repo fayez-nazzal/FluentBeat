@@ -24,7 +24,7 @@ class StorageRepository {
       await file.copy(filepath);
 
       return file;
-    } on Exception catch (e) {
+    } catch (e) {
       return null;
     }
   }

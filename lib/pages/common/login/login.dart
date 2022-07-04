@@ -64,7 +64,7 @@ class _LoginPageState extends State<LoginPage> {
           ),
           child: SafeArea(
               child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(10.0),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -72,7 +72,7 @@ class _LoginPageState extends State<LoginPage> {
                       const Spacer(flex: 2),
                       const Image(image: AssetImage('images/FluentBeat.png')),
                       const Spacer(),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6),
                       Column(
                         children: [
                           Column(

@@ -66,7 +66,7 @@ class SignupPageState extends State<SignupPage> {
   List<Step> getSteps() => [
         Step(
             isActive: currentIndex == 0,
-            title: const Text("Account"),
+            title: const Text("Account", style: TextStyle(fontSize: 10)),
             content: Scrollbar(
               child: ListView(
                   shrinkWrap: true,
@@ -78,7 +78,7 @@ class SignupPageState extends State<SignupPage> {
             )),
         Step(
             isActive: currentIndex == 1,
-            title: const Text("Extra Info"),
+            title: const Text("Extra Info", style: TextStyle(fontSize: 10)),
             content: Scrollbar(
               child: ListView(
                   shrinkWrap: true,
@@ -87,7 +87,7 @@ class SignupPageState extends State<SignupPage> {
             )),
         Step(
             isActive: currentIndex == 2,
-            title: const Text("Verify"),
+            title: const Text("Verify", style: TextStyle(fontSize: 10)),
             content: const Expanded(
                 child: SingleChildScrollView(child: Verfication())))
       ];
@@ -215,7 +215,7 @@ class SignupPageState extends State<SignupPage> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Image(image: AssetImage('images/FluentBeat.png')),
+                      const Image(image: AssetImage('images/FluentBeat.png')),
                       Expanded(
                         child: Stepper(
                             type: StepperType.horizontal,
