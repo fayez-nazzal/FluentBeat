@@ -107,29 +107,27 @@ class _DoctorDashboardState extends State<DoctorDashboard> {
                   height: 88.0,
                   padding: const EdgeInsets.only(left: 16, right: 16, top: 12),
                   color: Colors.transparent,
-                  child: Expanded(
-                    child: Card(
-                        child: Center(
-                            child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(8.0),
-                            child: doctorState.doctor!.image ?? Container(),
-                          ),
-                          const Spacer(),
-                          Text(doctorState.doctor!.name ?? "",
-                              style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.black87)),
-                          const Spacer(flex: 8)
-                        ],
-                      ),
-                    ))),
-                  ),
+                  child: Card(
+                      child: Center(
+                          child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8.0),
+                          child: doctorState.doctor!.image ?? Container(),
+                        ),
+                        const Spacer(),
+                        Text(doctorState.doctor!.name ?? "",
+                            style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black87)),
+                        const Spacer(flex: 8)
+                      ],
+                    ),
+                  ))),
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -166,10 +164,16 @@ class _DoctorDashboardState extends State<DoctorDashboard> {
                     )
                   ],
                 ),
+                Text(
+                    "${doctorState.doctor!.patients[doctorState.selectedPatient].name}'s Charts",
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                    )),
                 const Divider(
                   thickness: 2,
                   color: Colors.black12,
-                  height: 2,
+                  height: 16,
                 ),
                 if (doctorState.selectedPatient != -1)
                   Expanded(
@@ -186,12 +190,6 @@ class _DoctorDashboardState extends State<DoctorDashboard> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    Text(
-                                        "${doctorState.doctor!.patients[doctorState.selectedPatient].name} Predictions",
-                                        style: const TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w700,
-                                            color: Color(0xFFff6b6b))),
                                     Padding(
                                       padding: const EdgeInsets.all(8.0),
                                       child: SizedBox(

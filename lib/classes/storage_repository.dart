@@ -40,12 +40,25 @@ class StorageRepository {
         return file;
       }
 
-      // if not, download it
-      final result =
-          await Amplify.Storage.downloadFile(local: file, key: "$id.$format");
+      // check if file exists in s3
+      File? resultFile = await Amplify.Storage.list(
+        path: "$id.$format",
+      ).then((result) async {
+        if (result.items.isNotEmpty) {
+          // if not, download it
+          await (Amplify.Storage.downloadFile(local: file, key: "$id.$format")
+              .then((result) {
+            return File(result.file.path);
+          }).catchError((err) {
+            //nothing
+          }));
+        }
 
-      return File(result.file.path);
-    } on Exception catch (e) {
+        return null;
+      });
+
+      return resultFile;
+    } catch (_) {
       // file not found, do nothing
       return null;
     }
