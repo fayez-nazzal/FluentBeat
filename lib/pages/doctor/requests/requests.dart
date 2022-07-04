@@ -60,81 +60,77 @@ class _DoctorPatientRequestsState extends State<DoctorPatientRequests> {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.only(top: 10.0),
-              child: Expanded(
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: TextField(
-                        controller: _searchController,
-                        decoration: InputDecoration(
-                          hintText: "Search for a patient",
-                          prefixIcon: const Icon(Icons.search),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: TextField(
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        hintText: "Search for a patient",
+                        prefixIcon: const Icon(Icons.search),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                        onChanged: (txt) {
-                          setState(() {});
-                        },
                       ),
+                      onChanged: (txt) {
+                        setState(() {});
+                      },
                     ),
-                    Expanded(
-                      child: ListView.builder(
-                          shrinkWrap: true,
-                          scrollDirection: Axis.vertical,
-                          itemCount: filteredPatients.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            var patient = filteredPatients[index];
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                        shrinkWrap: true,
+                        scrollDirection: Axis.vertical,
+                        itemCount: filteredPatients.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          var patient = filteredPatients[index];
 
-                            return Column(
-                              children: [
-                                ListTile(
-                                  title: Text(patient.name),
-                                  leading: ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: patient.image),
-                                  trailing: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: <Widget>[
-                                      IconButton(
-                                        padding: const EdgeInsets.all(6),
-                                        constraints: const BoxConstraints(),
-                                        color: Colors.green,
-                                        icon: const Icon(Icons.check, size: 26),
-                                        onPressed: () =>
-                                            respondToPatient(patient.id, true),
-                                      ),
-                                      IconButton(
-                                        padding: const EdgeInsets.all(6),
-                                        constraints: const BoxConstraints(),
-                                        color: Colors.red,
-                                        icon:
-                                            const Icon(Icons.cancel, size: 26),
-                                        onPressed: () =>
-                                            respondToPatient(patient.id, false),
-                                      ),
-                                    ],
-                                  ),
+                          return Column(
+                            children: [
+                              ListTile(
+                                title: Text(patient.name),
+                                leading: ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: patient.image),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    IconButton(
+                                      padding: const EdgeInsets.all(6),
+                                      constraints: const BoxConstraints(),
+                                      color: Colors.green,
+                                      icon: const Icon(Icons.check, size: 26),
+                                      onPressed: () =>
+                                          respondToPatient(patient.id, true),
+                                    ),
+                                    IconButton(
+                                      padding: const EdgeInsets.all(6),
+                                      constraints: const BoxConstraints(),
+                                      color: Colors.red,
+                                      icon: const Icon(Icons.cancel, size: 26),
+                                      onPressed: () =>
+                                          respondToPatient(patient.id, false),
+                                    ),
+                                  ],
                                 ),
+                              ),
 
-                                // if this is the last one, no need for divider
-                                if (patient.id !=
-                                    filteredPatients[
-                                            filteredPatients.length - 1]
-                                        .id)
-                                  Divider(
-                                      thickness: 2,
-                                      height: 16,
-                                      indent: 16,
-                                      endIndent: 16,
-                                      color: Colors.grey.withOpacity(0.22)),
-                              ],
-                            );
-                          }),
-                    ),
-                  ],
-                ),
+                              // if this is the last one, no need for divider
+                              if (patient.id !=
+                                  filteredPatients[filteredPatients.length - 1]
+                                      .id)
+                                Divider(
+                                    thickness: 2,
+                                    height: 16,
+                                    indent: 16,
+                                    endIndent: 16,
+                                    color: Colors.grey.withOpacity(0.22)),
+                            ],
+                          );
+                        }),
+                  ),
+                ],
               ),
             ),
           ),
