@@ -5,6 +5,7 @@ import 'package:fluent_beat/classes/user.dart';
 import 'package:fluent_beat/pages/doctor/state/doctor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
@@ -19,11 +20,13 @@ class _DoctorPatientRequestsState extends State<DoctorPatientRequests> {
   final TextEditingController _searchController = TextEditingController();
   List<PatientClient> filteredPatients = [];
 
-  void respondToPatient(String patientId, bool accept) async {
+  void respondToPatient(
+      String patientId, bool accept, DoctorStateController doctorState) async {
     var user = await Amplify.Auth.getCurrentUser();
 
     var client = http.Client();
-    var response = await client.post(Uri.parse("${dotenv.env["API_URL"]}/"),
+
+    await client.post(Uri.parse("${dotenv.env["API_URL"]}/doctor/respond"),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -32,12 +35,20 @@ class _DoctorPatientRequestsState extends State<DoctorPatientRequests> {
           'patient_cognito_id': patientId,
           'accept': accept
         }));
+
+    doctorState.nullifyDoctor();
+    doctorState.getInfo();
   }
 
   @override
   Widget build(BuildContext context) {
     return GetBuilder<DoctorStateController>(builder: (doctorState) {
-      if (doctorState.doctor == null) return Container();
+      if (doctorState.doctor == null) {
+        return const SpinKitWave(
+          color: Color(0xFFff6b6b),
+          size: 50.0,
+        );
+      }
 
       List<PatientClient> patients = doctorState.doctor!.request_patients;
 
@@ -101,16 +112,16 @@ class _DoctorPatientRequestsState extends State<DoctorPatientRequests> {
                                       constraints: const BoxConstraints(),
                                       color: Colors.green,
                                       icon: const Icon(Icons.check, size: 26),
-                                      onPressed: () =>
-                                          respondToPatient(patient.id, true),
+                                      onPressed: () => respondToPatient(
+                                          patient.id, true, doctorState),
                                     ),
                                     IconButton(
                                       padding: const EdgeInsets.all(6),
                                       constraints: const BoxConstraints(),
                                       color: Colors.red,
                                       icon: const Icon(Icons.cancel, size: 26),
-                                      onPressed: () =>
-                                          respondToPatient(patient.id, false),
+                                      onPressed: () => respondToPatient(
+                                          patient.id, false, doctorState),
                                     ),
                                   ],
                                 ),

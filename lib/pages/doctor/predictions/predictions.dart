@@ -1,5 +1,6 @@
 import 'package:fluent_beat/pages/doctor/state/doctor.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 
 class DoctorPatientsPredictions extends StatefulWidget {
@@ -156,6 +157,9 @@ class _DoctorPatientsPredictionsState extends State<DoctorPatientsPredictions> {
                     ),
                 ],
               )
-            : Container());
+            : const SpinKitWave(
+                color: Color(0xFFff6b6b),
+                size: 50.0,
+              ));
   }
 }

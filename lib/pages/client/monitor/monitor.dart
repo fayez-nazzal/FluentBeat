@@ -115,7 +115,7 @@ class _ClientMonitorState extends State<ClientMonitor> {
   }
 
   void _updatePredictionText() {
-    int winnerClass = patientState.winnerClassThisWeek;
+    int winnerClass = patientState.winnerClassToday;
 
     bool abnormalWinner = patientState.winnerClassToday > 0 &&
         patientState.classCountsToday[patientState.winnerClassToday] > 12;

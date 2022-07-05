@@ -3,6 +3,7 @@ import 'package:fluent_beat/pages/client/dashboard/chart_data.dart';
 import 'package:fluent_beat/pages/doctor/state/doctor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
@@ -101,7 +102,10 @@ class _DoctorDashboardState extends State<DoctorDashboard> {
   Widget build(BuildContext context) {
     return GetBuilder<DoctorStateController>(
         builder: (doctorState) => doctorState.doctor == null
-            ? Container()
+            ? const SpinKitWave(
+                color: Color(0xFFff6b6b),
+                size: 50.0,
+              )
             : Column(children: [
                 Container(
                   height: 88.0,

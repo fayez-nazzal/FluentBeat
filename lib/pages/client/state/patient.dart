@@ -24,6 +24,11 @@ class PatientStateController extends GetxController {
   List<num> classCountsToday = [0, 0, 0, 0];
   final ImagePicker _picker = ImagePicker();
 
+  void nullifyPatient() {
+    patient = null;
+    update();
+  }
+
   Future getInfo() async {
     String patientCognitoId = (await Amplify.Auth.getCurrentUser()).userId;
 

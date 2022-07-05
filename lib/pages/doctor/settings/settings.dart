@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:fluent_beat/pages/doctor/state/doctor.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import '../../../app.dart';
 import '../../../ui/button.dart';
@@ -34,11 +35,19 @@ class _DoctorSettingsState extends State<DoctorSettings> {
     super.initState();
   }
 
+  void updateDoctor(DoctorStateController doctorState) {
+    doctorState.nullifyDoctor();
+    doctorState.getInfo();
+  }
+
   @override
   Widget build(BuildContext context) {
     return GetBuilder<DoctorStateController>(
         builder: (doctorState) => doctorState.doctor == null
-            ? Container()
+            ? const SpinKitWave(
+                color: Color(0xFFff6b6b),
+                size: 50.0,
+              )
             : Padding(
                 padding: const EdgeInsets.symmetric(vertical: 18.0),
                 child: Column(
@@ -73,9 +82,20 @@ class _DoctorSettingsState extends State<DoctorSettings> {
                     ),
                     const SizedBox(height: 24),
 
-                    const Text("Profile Info",
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.w500)),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text("Profile Info",
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.w500)),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 1.0),
+                          child: IconButton(
+                              onPressed: () => updateDoctor(doctorState),
+                              icon: const Icon(Icons.refresh)),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 16),
                     // show user info in list view
                     Expanded(

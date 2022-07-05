@@ -33,7 +33,14 @@ class DoctorStateController extends GetxController {
     update();
   }
 
+  void nullifyDoctor() {
+    _doctor = null;
+    update();
+  }
+
   void getInfo() async {
+    _doctor = null;
+
     String doctorCognitoId = (await Amplify.Auth.getCurrentUser()).userId;
 
     print("${dotenv.env["API_URL"]}/doctor?doctor_cognito_id=$doctorCognitoId");

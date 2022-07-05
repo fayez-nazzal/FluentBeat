@@ -6,6 +6,7 @@ import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:fluent_beat/classes/storage_repository.dart';
 import 'package:fluent_beat/pages/client/state/connection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../app.dart';
@@ -61,11 +62,19 @@ class _SettingsState extends State<Settings> {
     clientConnection.refreshConnection();
   }
 
+  void updatePatient(PatientStateController patientState) {
+    patientState.nullifyPatient();
+    patientState.getInfo();
+  }
+
   @override
   Widget build(BuildContext context) {
     return GetBuilder<PatientStateController>(
         builder: (patientState) => patientState.patient == null
-            ? Container()
+            ? const SpinKitWave(
+                color: Color(0xFFff6b6b),
+                size: 50.0,
+              )
             : Padding(
                 padding: const EdgeInsets.symmetric(vertical: 18.0),
                 child: Column(
@@ -100,9 +109,20 @@ class _SettingsState extends State<Settings> {
                     ),
                     const SizedBox(height: 24),
 
-                    const Text("Profile Info",
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.w500)),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text("Profile Info",
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.w500)),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 1.0),
+                          child: IconButton(
+                              onPressed: () => updatePatient(patientState),
+                              icon: const Icon(Icons.refresh)),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 16),
                     // show user info in list view
                     Expanded(
