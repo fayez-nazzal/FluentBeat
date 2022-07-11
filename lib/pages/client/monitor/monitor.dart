@@ -93,7 +93,7 @@ class _ClientMonitorState extends State<ClientMonitor> {
     "color": const Color(0xFFff6b6b),
   };
 
-  static PatientStateController get patientState => Get.find();
+  static PatientStateController get _patientState => Get.find();
 
   @override
   void initState() {
@@ -115,10 +115,10 @@ class _ClientMonitorState extends State<ClientMonitor> {
   }
 
   void _updatePredictionText() {
-    int winnerClass = patientState.winnerClassToday;
+    int winnerClass = _patientState.winnerClassToday;
 
-    bool abnormalWinner = patientState.winnerClassToday > 0 &&
-        patientState.classCountsToday[patientState.winnerClassToday] > 12;
+    bool abnormalWinner = _patientState.winnerClassToday > 0 &&
+        _patientState.classCountsToday[_patientState.winnerClassToday] > 12;
 
     if (winnerClass == 0 && heartrate < 70) {
       predictionCardStatus["title"] = abnormalBPMText["low-bpm"];
@@ -156,20 +156,24 @@ class _ClientMonitorState extends State<ClientMonitor> {
       predictionCardStatus["icon"] = Icons.sentiment_very_dissatisfied;
       predictionCardStatus["color"] = Colors.red;
     }
+
+    setState(() {});
   }
 
   void _checkEmergency(Timer timer) {
     // if the winnerClass is not zero and count is more than 12*5 ( equivelent to last 5 minutes ) -- low emergency ( simple push notification )
-    if (patientState.winnerClassToday != 0 &&
-        patientState.classCountsToday[patientState.winnerClassToday] > 12 * 5) {
+    if (_patientState.winnerClassToday != 0 &&
+        _patientState.classCountsToday[_patientState.winnerClassToday] >
+            12 * 5) {
       isPredictionEmergency = true;
     } else {
       isPredictionEmergency = false;
     }
 
     // if the winnerClass is not zero, count is more than 12*2 and BPM is high or low, make push notification emergency ( may be the 2nd in case of prediction emergency )
-    if (patientState.winnerClassToday != 0 &&
-        patientState.classCountsToday[patientState.winnerClassToday] > 12 * 2 &&
+    if (_patientState.winnerClassToday != 0 &&
+        _patientState.classCountsToday[_patientState.winnerClassToday] >
+            12 * 2 &&
         (heartrate < 70 || heartrate > 120)) {}
   }
 
@@ -275,7 +279,7 @@ class _ClientMonitorState extends State<ClientMonitor> {
         // nothing
       }
 
-      patientState.updateWinnerClass(predictedClass);
+      _patientState.updateWinnerClass(predictedClass);
     } else {}
 
     callingReq = false;
@@ -298,7 +302,7 @@ class _ClientMonitorState extends State<ClientMonitor> {
         'user_id': widget.user.userId,
         'data': ecgData,
         'bpm': heartrate,
-        "user_display_name": patientState.patient!.name
+        "user_display_name": _patientState.patient!.name
       }),
     );
 

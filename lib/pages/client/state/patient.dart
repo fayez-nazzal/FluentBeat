@@ -144,6 +144,9 @@ class PatientStateController extends GetxController {
     if (classIndex == -1) return;
 
     classCountsToday[classIndex]++;
+
+    print(classCountsToday);
+
     classCountsThisWeek[classIndex]++;
 
     int updateWinner(int winner, List<num> classCounts) {

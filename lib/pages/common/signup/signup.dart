@@ -45,6 +45,7 @@ class SignupPageState extends State<SignupPage> {
   List<String> genders = ["Male", "Female"];
   int currentIndex = 0;
   late List<Widget> pages;
+  final ScrollController _controller = ScrollController();
 
   SignupPageState({this.username = "", this.password = ""});
 
@@ -65,26 +66,30 @@ class SignupPageState extends State<SignupPage> {
 
   List<Step> getSteps() => [
         Step(
-            isActive: currentIndex == 0,
-            title: const Text("Account", style: TextStyle(fontSize: 10)),
-            content: Scrollbar(
-              child: ListView(
-                  shrinkWrap: true,
-                  physics: const ScrollPhysics(),
-                  children: const [
-                    Toggles(),
-                    AccountInfo(),
-                  ]),
-            )),
+          isActive: currentIndex == 0,
+          title: const Text("Account", style: TextStyle(fontSize: 10)),
+          content: Scrollbar(
+            child: ListView(
+                shrinkWrap: true,
+                physics: const ScrollPhysics(),
+                controller: _controller,
+                children: const [
+                  Toggles(),
+                  AccountInfo(),
+                ]),
+          ),
+        ),
         Step(
-            isActive: currentIndex == 1,
-            title: const Text("Extra Info", style: TextStyle(fontSize: 10)),
-            content: Scrollbar(
-              child: ListView(
-                  shrinkWrap: true,
-                  physics: const ScrollPhysics(),
-                  children: const [ExtraInfo()]),
-            )),
+          isActive: currentIndex == 1,
+          title: const Text("Extra Info", style: TextStyle(fontSize: 10)),
+          content: Scrollbar(
+            child: ListView(
+                shrinkWrap: true,
+                controller: _controller,
+                physics: const ScrollPhysics(),
+                children: const [ExtraInfo()]),
+          ),
+        ),
         Step(
             isActive: currentIndex == 2,
             title: const Text("Verify", style: TextStyle(fontSize: 10)),
@@ -92,7 +97,7 @@ class SignupPageState extends State<SignupPage> {
                 child: SingleChildScrollView(child: Verfication())))
       ];
 
-  void signUp() async {
+  Future<bool> signUp() async {
     bool matchPasswords = password == confirmPassword;
     bool hasAllFields =
         name != "" && username != "" && password != "" && confirmPassword != "";
@@ -109,7 +114,7 @@ class SignupPageState extends State<SignupPage> {
       }
     });
 
-    if (!matchPasswords || !hasAllFields) return;
+    if (!matchPasswords || !hasAllFields) return false;
 
     try {
       Map<CognitoUserAttributeKey, String> userAttributes = {
@@ -125,10 +130,12 @@ class SignupPageState extends State<SignupPage> {
     } on AuthException catch (e) {
       setState(() {
         message = e.message;
-
-        // print(e);
       });
+
+      return false;
     }
+
+    return true;
   }
 
   Future<void> confirmSignup() async {
@@ -144,11 +151,31 @@ class SignupPageState extends State<SignupPage> {
 
   void onStepContinue() async {
     if (currentIndex == 0) {
-      signUp();
+      var valid = await signUp();
+
+      if (!valid) return;
     } else if (currentIndex == 1) {
-      // TODO, just validate attribute
+      DateTime _15YearsAgo = DateTime.now().subtract(Duration(days: 365 * 15));
+
+      bool hasAllFields =
+          country != "" && birthday.isBefore(_15YearsAgo) && gender != "";
+
+      if (!hasAllFields) {
+        setState(() {
+          message = "Invalid Fields";
+        });
+
+        return;
+      }
     } else if (currentIndex == 2) {
-      // TODO, make sure verification code is provided
+      if (verficationCode == "") {
+        setState(() {
+          message = "Verification code is required";
+        });
+
+        return;
+      }
+
       await confirmSignup();
 
       // check if user is signed in
@@ -189,6 +216,7 @@ class SignupPageState extends State<SignupPage> {
     if (currentIndex < 2) {
       setState(() {
         currentIndex++;
+        message = "";
       });
     }
   }
@@ -217,22 +245,49 @@ class SignupPageState extends State<SignupPage> {
                     children: [
                       const Image(image: AssetImage('images/FluentBeat.png')),
                       Expanded(
-                        child: Stepper(
-                            type: StepperType.horizontal,
-                            steps: getSteps(),
-                            currentStep: currentIndex,
-                            onStepTapped: null,
-                            onStepCancel: null,
-                            controlsBuilder: (BuildContext context,
-                                ControlsDetails details) {
-                              return TextButton(
-                                  onPressed: details.onStepContinue,
-                                  child: Button(
-                                      bg: 0xFFff6b6b,
-                                      text: "Continue",
-                                      onPress: onStepContinue));
-                            }),
-                      )
+                        child: Column(
+                          children: [
+                            const Text("Create your account",
+                                style: TextStyle(
+                                    color: Colors.black87,
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 23)),
+                            const SizedBox(
+                              height: 12,
+                            ),
+                            Expanded(
+                              child: Scrollbar(
+                                child: Stepper(
+                                    type: StepperType.horizontal,
+                                    steps: getSteps(),
+                                    currentStep: currentIndex,
+                                    onStepTapped: (step) {
+                                      setState(() {
+                                        currentIndex = step;
+                                        message = "";
+                                      });
+                                    },
+                                    onStepCancel: null,
+                                    controlsBuilder: (BuildContext context,
+                                        ControlsDetails details) {
+                                      return TextButton(
+                                          onPressed: details.onStepContinue,
+                                          child: Button(
+                                              bg: 0xFFff6b6b,
+                                              text: "Continue",
+                                              onPress: onStepContinue));
+                                    }),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (message != "")
+                        Text(message,
+                            style: const TextStyle(
+                                color: Colors.red,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 20)),
                     ],
                   )))),
     );
